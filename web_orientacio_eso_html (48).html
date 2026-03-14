@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orientació després de l'ESO</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <style>
+    :root{
+      --bg:#081120;
+      --bg2:#0f172a;
+      --panel:rgba(255,255,255,0.82);
+      --panel-strong:rgba(255,255,255,0.92);
+      --text:#0f172a;
+      --muted:#5b6b84;
+      --line:rgba(148,163,184,0.28);
+      --blue:#2563eb;
+      --blue2:#60a5fa;
+      --violet:#7c3aed;
+      --pink:#ec4899;
+      --green:#16a34a;
+      --amber:#f59e0b;
+      --red:#dc2626;
+      --shadow:0 20px 60px rgba(2,8,23,0.24);
+      --shadow-soft:0 10px 30px rgba(15,23,42,0.14);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:16px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(96,165,250,0.24), transparent 22%),
+        radial-gradient(circle at 90% 18%, rgba(236,72,153,0.16), transparent 18%),
+        radial-gradient(circle at 80% 78%, rgba(124,58,237,0.18), transparent 22%),
+        linear-gradient(135deg, var(--bg) 0%, #0b1221 45%, #111827 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body::before,
+    body::after{
+      content:"";
+      position:fixed;
+      inset:auto;
+      width:420px;
+      height:420px;
+      border-radius:999px;
+      filter:blur(70px);
+      opacity:.18;
+      pointer-events:none;
+      z-index:0;
+      animation:floatBlob 14s ease-in-out infinite;
+    }
+    body::before{left:-120px;top:120px;background:#60a5fa}
+    body::after{right:-120px;bottom:60px;background:#a855f7;animation-delay:-5s}
+    @keyframes floatBlob{
+      0%,100%{transform:translateY(0) scale(1)}
+      50%{transform:translateY(-20px) scale(1.05)}
+    }
+    header{
+      position:relative;
+      z-index:1;
+      padding:42px 20px 28px;
+      text-align:center;
+      color:white;
+      background:
+        linear-gradient(135deg, rgba(37,99,235,.92), rgba(124,58,237,.86) 55%, rgba(236,72,153,.78));
+      overflow:hidden;
+      border-bottom:1px solid rgba(255,255,255,.18);
+      box-shadow:0 20px 50px rgba(15,23,42,.28);
+    }
+    header::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent),
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.14), transparent 18%),
+        radial-gradient(circle at 80% 24%, rgba(255,255,255,.14), transparent 16%);
+      animation:shine 12s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes shine{
+      0%{transform:translateX(-8%)}
+      50%{transform:translateX(6%)}
+      100%{transform:translateX(-8%)}
+    }
+    header h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem,4vw,3.3rem);
+      letter-spacing:-0.04em;
+      text-shadow:0 6px 22px rgba(0,0,0,.2);
+      position:relative;
+      z-index:1;
+    }
+    header p{
+      margin:0 auto;
+      max-width:1100px;
+      line-height:1.65;
+      font-size:1.03rem;
+      opacity:.97;
+      position:relative;
+      z-index:1;
+    }
+    nav{
+      position:sticky;
+      top:0;
+      z-index:30;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      padding:16px;
+      margin:18px auto 0;
+      width:min(1120px, calc(100% - 24px));
+      flex-wrap:wrap;
+      backdrop-filter:blur(18px);
+      background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:999px;
+      box-shadow:var(--shadow-soft);
+    }
+    nav button{
+      border:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(226,232,240,.92));
+      color:#1d4ed8;
+      padding:13px 22px;
+      border-radius:999px;
+      font-size:1rem;
+      cursor:pointer;
+      font-weight:800;
+      transition:transform .24s ease, box-shadow .24s ease, background .24s ease, color .24s ease;
+      box-shadow:0 8px 20px rgba(15,23,42,.08);
+    }
+    nav button:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 14px 30px rgba(15,23,42,.14)}
+    nav button.active{
+      background:linear-gradient(135deg, var(--blue), var(--violet));
+      color:white;
+      box-shadow:0 16px 34px rgba(37,99,235,.35);
+    }
+    .page{
+      display:none;
+      max-width:1500px;
+      margin:0 auto;
+      padding:28px 18px 44px;
+      position:relative;
+      z-index:1;
+      animation:pageIn .35s ease;
+    }
+    @keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .page.active{display:block}
+    .layout-principal{display:grid;grid-template-columns:430px minmax(0,1fr);gap:22px;align-items:start}
+    .card{
+      background:var(--panel);
+      backdrop-filter:blur(18px);
+      border:1px solid rgba(255,255,255,.38);
+      border-radius:var(--radius-xl);
+      padding:24px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,.22), transparent 40%, transparent 60%, rgba(96,165,250,.08));
+      pointer-events:none;
+    }
+    .card > *{position:relative;z-index:1}
+    .card h2,.card h3,.card h4{
+      margin-top:0;
+      letter-spacing:-0.03em;
+    }
+    .card h2{font-size:clamp(1.5rem,2vw,2.2rem)}
+    .muted{color:var(--muted);font-size:.97rem;line-height:1.55}
+    .ai-panel{position:sticky;top:98px;max-height:calc(100vh - 112px);overflow:auto;padding-right:2px}
+    .chat-box{
+      background:rgba(248,250,252,.82);
+      border:1px solid rgba(148,163,184,.24);
+      border-radius:20px;
+      min-height:220px;
+      max-height:340px;
+      overflow:auto;
+      padding:14px;
+      margin-bottom:12px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+    }
+    .msg{
+      padding:12px 14px;
+      border-radius:18px;
+      margin-bottom:10px;
+      line-height:1.5;
+      white-space:pre-wrap;
+      animation:msgIn .25s ease;
+      box-shadow:0 8px 20px rgba(15,23,42,.06);
+    }
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .msg.user{background:linear-gradient(135deg, #dbeafe, #eff6ff);border-bottom-left-radius:8px}
+    .msg.ai{background:linear-gradient(135deg, #eef2ff, #f8fafc);border-bottom-right-radius:8px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row>*{flex:1}
+    textarea,input,select{
+      width:100%;
+      padding:13px 14px;
+      border:1px solid rgba(148,163,184,.3);
+      border-radius:16px;
+      font-size:1rem;
+      margin-top:6px;
+      margin-bottom:12px;
+      background:rgba(255,255,255,.92);
+      box-shadow:inset 0 1px 2px rgba(15,23,42,.05);
+      transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    textarea:focus,input:focus,select:focus{
+      outline:none;
+      border-color:rgba(37,99,235,.55);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12), inset 0 1px 2px rgba(15,23,42,.05);
+      transform:translateY(-1px);
+    }
+    textarea{min-height:92px;resize:vertical}
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+      background:linear-gradient(135deg, var(--blue), var(--violet));
+      color:white;
+      box-shadow:0 14px 28px rgba(37,99,235,.28);
+      transition:transform .22s ease, box-shadow .22s ease, filter .22s ease;
+    }
+    .btn:hover{transform:translateY(-2px);filter:saturate(1.06);box-shadow:0 18px 30px rgba(37,99,235,.34)}
+    .btn.secondary{background:linear-gradient(135deg, #e0ecff, #eef2ff);color:#1d4ed8;box-shadow:0 12px 24px rgba(37,99,235,.12)}
+    .btn.ghost{background:linear-gradient(135deg, #f8fafc, #e2e8f0);color:#334155;box-shadow:0 10px 22px rgba(15,23,42,.08)}
+    .btn.danger{background:linear-gradient(135deg, #ef4444, #b91c1c);box-shadow:0 14px 28px rgba(185,28,28,.25)}
+    .btn.success{background:linear-gradient(135deg, #22c55e, #15803d);box-shadow:0 14px 28px rgba(21,128,61,.24)}
+    .btn.blue{background:linear-gradient(135deg, #3b82f6, #1d4ed8)}
+    .btn.red{background:linear-gradient(135deg, #f87171, #dc2626)}
+    .options-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+    .option-card{
+      border:1px solid rgba(148,163,184,.2);
+      border-radius:22px;
+      padding:16px;
+      background:rgba(255,255,255,.88);
+      box-shadow:0 14px 26px rgba(15,23,42,.08);
+      transition:transform .24s ease, box-shadow .24s ease;
+    }
+    .option-card:hover{transform:translateY(-4px);box-shadow:0 20px 34px rgba(15,23,42,.14)}
+    .option-card.green{border-color:rgba(34,197,94,.35);background:linear-gradient(180deg,#f0fdf4,#ffffff)}
+    .option-card.blue{border-color:rgba(37,99,235,.35);background:linear-gradient(180deg,#eff6ff,#ffffff)}
+    .option-card.red{border-color:rgba(239,68,68,.35);background:linear-gradient(180deg,#fef2f2,#ffffff)}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
+    .info-box{
+      background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(248,250,252,.92));
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:20px;
+      padding:16px;
+      box-shadow:0 10px 24px rgba(15,23,42,.07);
+    }
+    .info-box strong{display:block;color:#334155;margin-bottom:8px;font-size:.93rem;text-transform:uppercase;letter-spacing:.03em}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .badge,.badge-click{
+      background:linear-gradient(135deg, #dbeafe, #eff6ff);
+      color:#1e40af;
+      padding:9px 13px;
+      border-radius:999px;
+      font-size:.94rem;
+      border:none;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(37,99,235,.08);
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .badge-click:hover{transform:translateY(-2px);box-shadow:0 12px 22px rgba(37,99,235,.14)}
+    ul{padding-left:20px}
+    .svg-wrap{
+      overflow-x:auto;
+      padding:10px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.58), rgba(241,245,249,.38));
+      border:1px solid rgba(255,255,255,.4);
+    }
+    .svg-node{
+      width:100%;height:100%;border:2px solid rgba(148,163,184,.35);
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      border-radius:20px;font-weight:800;cursor:pointer;color:#0f172a;font-size:16px;line-height:1.2;
+      transition:.22s;box-shadow:0 10px 20px rgba(15,23,42,.08)
+    }
+    .svg-node span{font-size:13px;font-weight:500;color:#475569}
+    .svg-node:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 18px 30px rgba(15,23,42,.14)}
+    .svg-node.active{background:linear-gradient(135deg, var(--blue), var(--violet));color:white;border-color:transparent;box-shadow:0 18px 34px rgba(37,99,235,.34)}
+    .svg-node.active span{color:rgba(255,255,255,.9)}
+    .path-line{stroke:#94a3b8;stroke-width:3.5;marker-end:url(#arrowhead);transition:.25s}
+    .path-line.green{stroke:#16a34a;stroke-width:5}
+    .path-line.blue{stroke:#2563eb;stroke-width:5}
+    .path-line.red{stroke:#dc2626;stroke-width:5}
+    .saved-route{border:1px solid rgba(148,163,184,.22);border-radius:18px;padding:14px;margin-bottom:10px;background:rgba(255,255,255,.9);box-shadow:0 12px 26px rgba(15,23,42,.08)}
+    .classe-layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px}
+    .alumnes-lista{max-height:620px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+    .alumne-btn{
+      border:1px solid rgba(148,163,184,.2);
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      border-radius:16px;
+      padding:13px;
+      text-align:left;
+      cursor:pointer;
+      font-size:1rem;
+      font-weight:700;
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .alumne-btn:hover{transform:translateY(-2px);box-shadow:0 14px 24px rgba(15,23,42,.1)}
+    .alumne-btn.active{background:linear-gradient(135deg,var(--blue),var(--violet));color:white;border-color:transparent;box-shadow:0 16px 28px rgba(37,99,235,.32)}
+    .mini-esquema{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+    .mini-box{border:1px solid rgba(148,163,184,.22);background:linear-gradient(180deg,#ffffff,#f8fafc);border-radius:18px;padding:14px;box-shadow:0 10px 20px rgba(15,23,42,.06)}
+    .comptador{font-size:1rem;font-weight:800;color:#1d4ed8;margin-top:8px;margin-bottom:8px}
+    .pissarra-board{
+      background:linear-gradient(180deg,#fffbe7,#fef3c7);
+      border:2px dashed rgba(234,179,8,.55);
+      border-radius:22px;
+      padding:18px;
+      min-height:220px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+    }
+    .teacher-strip{border-left:6px solid #f59e0b;background:linear-gradient(180deg,#fff8df,#fffbeb);padding:16px;border-radius:18px;box-shadow:0 10px 22px rgba(245,158,11,.1)}
+    .subchoice{border:2px dashed rgba(148,163,184,.26);border-radius:16px;padding:12px;margin-top:12px;background:rgba(255,255,255,.55)}
+    .legend-color{display:inline-block;width:12px;height:12px;border-radius:999px;margin-right:6px}
+    .stat-pill{padding:8px 12px;border-radius:999px;background:#eff6ff;display:inline-block;margin:4px 6px 0 0;box-shadow:0 8px 16px rgba(37,99,235,.08)}
+    .mapa-wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+    .mapa-box{border:1px solid rgba(148,163,184,.22);border-radius:24px;overflow:hidden;background:rgba(255,255,255,.84);box-shadow:0 16px 34px rgba(15,23,42,.14)}
+    #mapaLeaflet{width:100%;height:520px}
+    .mapa-side-card{border:1px solid rgba(148,163,184,.2);border-radius:20px;padding:16px;background:rgba(255,255,255,.9);margin-bottom:12px;box-shadow:0 12px 24px rgba(15,23,42,.08)}
+    .stars{color:#f59e0b;letter-spacing:2px;font-size:1.1rem}
+    .resultat-destacat{border-left:6px solid #f59e0b;background:linear-gradient(180deg,#fff8df,#fffbeb);padding:16px;border-radius:18px;margin-top:12px;box-shadow:0 10px 22px rgba(245,158,11,.1)}
+    .centre-rank{border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:12px;margin-bottom:10px;background:#fff;box-shadow:0 10px 20px rgba(15,23,42,.05)}
+    .centre-rank.top{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.15),0 12px 24px rgba(245,158,11,.1)}
+    .leaflet-popup-content{line-height:1.5}
+    .mapa-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .legend-pill{background:rgba(239,246,255,.9);border:1px solid rgba(148,163,184,.18);border-radius:999px;padding:6px 10px;font-size:.9rem;box-shadow:0 6px 14px rgba(15,23,42,.05)}
+    @media (max-width:1100px){
+      .layout-principal{grid-template-columns:1fr}
+      .ai-panel{position:static;max-height:none}
+      .options-grid{grid-template-columns:1fr}
+      .classe-layout{grid-template-columns:1fr}
+      .mapa-wrap{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Orientació després de l'ESO</h1>
+    <p>Web d'orientació completa amb esquema visual, assistent orientador, cicles, batxillerats, noms de la classe, pissarra, estadístiques i recorreguts guardats.</p>
+  </header>
+
+  <nav>
+    <button id="btnItineraris" class="active" type="button">Itineraris</button>
+    <button id="btnClasse" type="button">Noms</button>
+    <button id="btnPissarra" type="button">Pissarra</button>
+    <button id="btnRecorreguts" type="button">Recorreguts guardats</button>
+    <button id="btnMapa" type="button">Mapa</button>
+  </nav>
+
+  <section id="itineraris" class="page active">
+    <div class="layout-principal">
+      <aside class="ai-panel">
+        <div class="card">
+          <h2>Assistent orientador</h2>
+          <p class="muted">Explica què t'agrada, què et costa, què et preocupa o què voldries fer. L'assistent et recomanarà 3 opcions i pintarà les fletxes.</p>
+          <div class="chat-box" id="chatAI"></div>
+          <label for="entradaAI">Parla amb l'assistent</label>
+          <textarea id="entradaAI"></textarea>
+          <div class="row">
+            <button class="btn" id="sendAI" type="button">Enviar</button>
+            <button class="btn ghost" id="newPathAI" type="button">Empezar nou camí</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Previsualització de recorreguts</h3>
+          <p class="muted"><span class="legend-color" style="background:#16a34a"></span>Opció verda &nbsp; <span class="legend-color" style="background:#2563eb"></span>Opció blava &nbsp; <span class="legend-color" style="background:#dc2626"></span>Opció vermella</p>
+          <div class="options-grid" id="opcionsIA"></div>
+          <div id="detallOpcioEscollida" class="muted" style="margin-top:12px;">Encara no has triat cap recorregut.</div>
+          <label for="nomRecorregut">Nom del recorregut</label>
+          <input id="nomRecorregut" />
+          <div class="row">
+            <button class="btn success" id="saveRoute" type="button">Guardar recorregut</button>
+            <button class="btn danger" id="clearRoutePreview" type="button">Esborrar opcions</button>
+          </div>
+        </div>
+
+        <div class="card teacher-strip">
+          <h3>Ajuda per a la professora</h3>
+          <div id="resumProfessora">Encara no hi ha cap recorregut seleccionat.</div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="card">
+          <h2>Esquema visual després de l'ESO</h2>
+          <div class="svg-wrap">
+            <svg width="1200" height="760" viewBox="0 0 1200 760" style="max-width:100%;height:auto;display:block;margin:auto;">
+              <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"></polygon></marker></defs>
+              <line id="line-eso-treballar" class="path-line" x1="600" y1="80" x2="170" y2="210" />
+              <line id="line-eso-ptt" class="path-line" x1="600" y1="80" x2="390" y2="210" />
+              <line id="line-eso-cicles" class="path-line" x1="600" y1="80" x2="630" y2="210" />
+              <line id="line-eso-batxillerat" class="path-line" x1="600" y1="80" x2="980" y2="210" />
+              <foreignObject x="530" y="20" width="140" height="60"><button class="svg-node" data-route="eso" type="button">ESO</button></foreignObject>
+              <foreignObject x="80" y="210" width="180" height="76"><button class="svg-node" data-route="treballar" type="button">Treballar<br><span>quant cobres: 1200 €</span></button></foreignObject>
+              <foreignObject x="310" y="210" width="180" height="76"><button class="svg-node" data-route="ptt" type="button">PTT / PFI<br><span>1 any</span></button></foreignObject>
+              <foreignObject x="540" y="210" width="180" height="76"><button class="svg-node" data-route="cicles" type="button">Cicles d'Olot<br><span>tria el cicle</span></button></foreignObject>
+              <foreignObject x="890" y="210" width="180" height="76"><button class="svg-node" data-route="batxillerat" type="button">Batxillerat<br><span>tria la modalitat</span></button></foreignObject>
+              <line id="line-cicles-cfgm-admin" class="path-line" x1="630" y1="286" x2="490" y2="380" />
+              <line id="line-cicles-cfgm-info" class="path-line" x1="630" y1="286" x2="700" y2="380" />
+              <line id="line-batx-selectivitat" class="path-line" x1="980" y1="286" x2="980" y2="380" />
+              <line id="line-cfgm-admin-cfgs-admin" class="path-line" x1="490" y1="456" x2="490" y2="550" />
+              <line id="line-cfgm-info-cfgs-daw" class="path-line" x1="700" y1="456" x2="700" y2="550" />
+              <line id="line-cfgs-admin-sortides" class="path-line" x1="490" y1="626" x2="490" y2="700" />
+              <line id="line-cfgs-daw-sortides" class="path-line" x1="700" y1="626" x2="700" y2="700" />
+              <line id="line-selectivitat-universitat" class="path-line" x1="980" y1="456" x2="980" y2="700" />
+              <foreignObject x="400" y="380" width="180" height="76"><button class="svg-node" data-route="cfgm_admin" type="button">Cicle<br><span>Gestió administrativa</span></button></foreignObject>
+              <foreignObject x="610" y="380" width="180" height="76"><button class="svg-node" data-route="cfgm_info" type="button">Cicle<br><span>Informàtica</span></button></foreignObject>
+              <foreignObject x="890" y="380" width="180" height="76"><button class="svg-node" data-route="selectivitat" type="button">Selectivitat</button></foreignObject>
+              <foreignObject x="400" y="550" width="180" height="76"><button class="svg-node" data-route="cfgs_admin" type="button">Cicle<br><span>Administració i finances</span></button></foreignObject>
+              <foreignObject x="610" y="550" width="180" height="76"><button class="svg-node" data-route="cfgs_daw" type="button">Cicle<br><span>DAW</span></button></foreignObject>
+              <foreignObject x="400" y="700" width="180" height="50"><button class="svg-node" data-route="sortides_cfgs" type="button">Sortides / Feines</button></foreignObject>
+              <foreignObject x="610" y="700" width="180" height="50"><button class="svg-node" data-route="sortides_cfgs" type="button">Sortides CFGS<br><span>Feines possibles</span></button></foreignObject>
+              <foreignObject x="890" y="700" width="180" height="50"><button class="svg-node" data-route="universitat" type="button">Universitat / Grau</button></foreignObject>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card" id="infoRuta" style="display:none;">
+          <h2 id="rutaTitol"></h2>
+          <p id="rutaResum"></p>
+          <div class="info-grid">
+            <div class="info-box"><strong>Durada</strong><span id="rutaDurada"></span></div>
+            <div class="info-box"><strong>Quines opcions tens després</strong><span id="rutaFinal"></span></div>
+            <div class="info-box"><strong>Possibles salaris en el futur</strong><span id="rutaCobres"></span></div>
+            <div class="info-box"><strong>Nota mínima aprox. \(últim any\)</strong><span id="rutaSou"></span></div>
+          </div>
+          <div class="badges" id="rutaPassos"></div>
+          <ul id="rutaDetalls"></ul>
+          <div id="opcionsRuta" style="margin-top:16px;"></div>
+          <div class="subchoice" id="triaAutomaticaIA" style="display:none;"><strong>Camí recomanat segons el teu perfil</strong><div id="triaAutomaticaIAText" class="muted"></div></div>
+          <div class="info-grid" id="itinerarisExtraBloc" style="display:none; margin-top:16px;"><div class="info-box"><strong>Note de tall últim any</strong><span id="itinerarisNotaTall">-</span></div><div class="info-box"><strong>Assignatures que faràs</strong><div id="itinerarisAssignatures">-</div></div></div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <section id="classe" class="page">
+    <div class="card">
+      <h2>Ajuda AI per Noms</h2>
+      <div class="layout-principal" style="grid-template-columns: 420px minmax(0,1fr);">
+        <div class="card" style="margin-bottom:0;"><h3>Xat AI de l'alumne seleccionat</h3><div class="chat-box" id="chatNomsAI"></div><textarea id="nomsAIText"></textarea><div class="row"><button class="btn" id="processStudentAI" type="button">Enviar i actualitzar alumne</button><button class="btn secondary" id="clearStudentAI" type="button">Netejar xat</button></div></div>
+        <div class="card teacher-strip" style="margin-bottom:0;"><div id="nomsAIResposta">Encara no hi ha orientació generada.</div></div>
+      </div>
+    </div>
+
+    <div class="classe-layout">
+      <div class="card"><h2>Noms de la classe</h2><p class="muted">Pol va primer i Toni va segon, tal com has demanat.</p><p class="muted"><strong>Guardat automàtic:</strong> els canvis de cada alumne es guarden encara que tanquis i tornis a obrir la web al mateix navegador.</p><div class="comptador">Persones a la classe: 33</div><div id="statsClasse"></div><input type="text" id="cercador" /><div class="alumnes-lista" id="llistaAlumnes"></div></div>
+      <div class="card"><h2 id="fitxaNom">Fitxa de Pol</h2><label for="nota">Note de tall</label><input type="text" id="nota" /><label for="itinerari">Itinerari recomanat</label><select id="itinerari"><option value="batxillerat">Batxillerat</option><option value="cicles">Cicles</option><option value="ptt">PTT / PFI</option><option value="treballar">Treballar</option></select><label for="cicle">Cicle concret o batxillerat concret</label><input type="text" id="cicle" /><div class="info-grid"><div class="info-box"><strong>Note de tall últim any</strong><span id="nomsNotaTall">5</span></div><div class="info-box"><strong>Assignatures que faràs</strong><div id="nomsAssignatures">Depèn de l’itinerari o del cicle.</div></div></div><label for="observacions">Observacions</label><textarea id="observacions"></textarea><div class="mini-esquema"><div class="mini-box"><strong>Ara</strong><br>ESO</div><div class="mini-box"><strong>Següent pas</strong><br><span id="miniPas">Batxillerat</span></div><div class="mini-box"><strong>Durada</strong><br><span id="miniDurada">2 anys</span></div><div class="mini-box"><strong>Note de tall</strong><br><span id="miniNota">5</span></div><div class="mini-box"><strong>Quant cobres</strong><br><span id="miniCobra">Depèn</span></div><div class="mini-box"><strong>On acabes</strong><br><span id="miniFinal">Selectivitat i després grau universitari</span></div></div></div>
+    </div>
+  </section>
+
+  <section id="pissarra" class="page"><div class="card"><div class="info-grid"><div class="info-box"><p id="preguntaJoc">Clica el botó per veure una pregunta.</p><button class="btn secondary" id="newQuestion" type="button">Nova pregunta</button></div><div class="info-box"><input type="text" id="respostaJoc" /><button class="btn" id="addAnswer" type="button">Afegir resposta</button></div><div class="info-box"><div class="badges"><button class="badge-click" data-quick-board="Endevina qui prefereix un cicle" type="button">Endevina qui</button><button class="badge-click" data-quick-board="Digues una carrera que t'interessa" type="button">Carrera</button><button class="badge-click" data-quick-board="Digues un treball que t'agradaria fer" type="button">Treball</button><button class="badge-click" data-quick-board="Quin itinerari triaries avui?" type="button">Itinerari</button></div></div></div><div class="pissarra-board" style="margin-top:20px;"><div id="llistaPissarra"></div><div style="margin-top:12px;"><button class="btn danger" id="resetBoard" type="button">Reiniciar joc</button></div></div></div></section>
+
+  <section id="recorreguts" class="page"><div class="card"><div id="llistaRecorreguts"></div></div></section>
+
+  <section id="mapa" class="page">
+    <div class="card">
+      <h2>Mapa d'Olot</h2>
+      <p class="muted">Primer tries si busques batxillerat o cicles. Després selecciones l'opció exacta en un desplegable i el mapa et recomana el centre amb una nota sobre 5.</p>
+      <label for="tipusMapa">Quin tipus d'estudi busques?</label>
+      <select id="tipusMapa">
+        <option value="batxillerat">Batxillerat</option>
+        <option value="cicles">Cicles</option>
+      </select>
+      <label for="opcioMapa">Quin batxillerat o quin cicle vols fer?</label>
+      <select id="opcioMapa"></select>
+      <div class="row">
+        <button class="btn" id="buscarMapa" type="button">Buscar al mapa</button>
+        <button class="btn secondary" id="netejarMapa" type="button">Netejar cerca</button>
+      </div>
+      <div id="resumMapa" class="resultat-destacat">Encara no has buscat cap estudi.</div>
+      <div class="mapa-wrap" style="margin-top:18px;">
+        <div class="mapa-box">
+          <div id="mapaLeaflet"></div>
+        </div>
+        <div>
+          <div class="mapa-side-card">
+            <h3>Informació del centre seleccionat</h3>
+            <div id="infoCentreMapa">Clica un punt del mapa per veure quins cicles i batxillerats hi fan.</div>
+          </div>
+          <div class="mapa-side-card">
+            <h3>Valoració segons la teva cerca</h3>
+            <div id="rankingCentresMapa">Encara no hi ha cap valoració.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const opcionsBatxillerat=[{nom:'Batxillerat Científic',id:'batx_cientific'},{nom:'Batxillerat Tecnològic',id:'batx_tecnologic'},{nom:'Batxillerat Humanitats i Ciències Socials',id:'batx_humanistic'},{nom:'Batxillerat Arts',id:'batx_arts'}];
+    const opcionsCicles=[{nom:'CFGM Gestió Administrativa',id:'cfgm_admin'},{nom:'CFGM Informàtica',id:'cfgm_info'},{nom:'CFGS Administració i Finances',id:'cfgs_admin'},{nom:'CFGS DAW (Desenvolupament Web)',id:'cfgs_daw'}];
+    const nomsClasse=['Pol','Toni','Arnau','Abril','Aura','Bruna','Carla','Daniel','Edgar','Énia','Helena','Josep C.','Jana','Josep S.','Joel','Laia C','Laia P','Martí','Mireia','Nikola','Nora','Roger','Sara','Aina','Ada','Ibra','Isabela','Mical','Ona','Sirat','Fatu','Bintou'];
+    const rutes={eso:{titol:'ESO',resum:'Etapa obligatòria abans de triar el camí següent.',durada:'4 anys',final:'Batxillerat, cicles, PTT / PFI o treballar',cobres:'Si després treballes: 1200 € aprox.',sou:'-',passos:['ESO'],detalls:['Educació obligatòria.']},treballar:{titol:'Treballar',resum:'Entrada directa al món laboral després de l ESO.',durada:'Directe',final:'Feina',cobres:'1200 € aprox.',sou:'No cal',passos:['ESO','Treball'],detalls:['Entrada directa al món laboral.']},ptt:{titol:'PTT / PFI',resum:'Programa de transició.',durada:'1 any',final:'CFGM o feina',cobres:'Depèn del que facis després',sou:'No fixa',passos:['ESO','PTT / PFI'],detalls:['Programa de transició.'],assignatures:['Tallers pràctics','Orientació','Competències bàsiques','Preparació professional']},batxillerat:{titol:'Batxillerat',resum:'Camí acadèmic de 2 anys.',durada:'2 anys',final:'Selectivitat i universitat',cobres:'Depèn de la carrera i la feina després',sou:'5',passos:['ESO','Batxillerat','Selectivitat'],detalls:['Et prepara per la universitat.']},batx_cientific:{titol:'Batxillerat Científic',resum:'Modalitat orientada a ciències i salut.',durada:'2 anys',final:'Selectivitat i universitat',cobres:'Depèn de la carrera i la feina després',sou:'5',passos:['ESO','Batxillerat Científic','Selectivitat'],detalls:['Ideal per salut i ciències.'],assignatures:['Català','Castellà','Anglès','Filosofia','Història','Matemàtiques','Biologia','Química','Física']},batx_tecnologic:{titol:'Batxillerat Tecnològic',resum:'Modalitat orientada a enginyeries i tecnologia.',durada:'2 anys',final:'Selectivitat i universitat',cobres:'Depèn de la carrera i la feina després',sou:'5',passos:['ESO','Batxillerat Tecnològic','Selectivitat'],detalls:['Ideal per tecnologia i enginyeria.'],assignatures:['Català','Castellà','Anglès','Filosofia','Història','Matemàtiques','Física','Dibuix tècnic','Tecnologia i enginyeria']},batx_humanistic:{titol:'Batxillerat Humanitats i Ciències Socials',resum:'Modalitat orientada a lletres, idiomes, empresa i dret.',durada:'2 anys',final:'Selectivitat i universitat',cobres:'Depèn de la carrera i la feina després',sou:'5',passos:['ESO','Batx Humanístic / Social','Selectivitat'],detalls:['Ideal per dret, empresa, idiomes i carreres socials.'],assignatures:['Català','Castellà','Anglès','Filosofia','Història','Llatí','Economia','Geografia','Història del món contemporani']},batx_arts:{titol:'Batxillerat Arts',resum:'Modalitat orientada a art, disseny i expressió visual.',durada:'2 anys',final:'Selectivitat o estudis artístics',cobres:'Depèn dels estudis i de la feina després',sou:'5',passos:['ESO','Batx Arts'],detalls:['Ideal per disseny, audiovisuals i belles arts.'],assignatures:['Català','Castellà','Anglès','Filosofia','Història','Dibuix artístic','Cultura audiovisual','Fonaments de l art','Projectes artístics']},cicles:{titol:'Cicles d Olot',resum:'Has de triar el cicle concret.',durada:'2 anys',final:'Feina o CFGS',cobres:'Depèn del cicle',sou:'Depèn',passos:['ESO','CFGM o CFGS'],detalls:['Els cicles són a Olot.','Has de triar un cicle concret.']},cfgm_admin:{titol:'CFGM Gestió Administrativa',resum:'Cicle de grau mitjà d administració.',durada:'2 anys',final:'Tècnic administratiu o CFGS',cobres:'1400-1600 €',sou:'5.8',passos:['ESO','CFGM','CFGS o feina'],detalls:['Cicle d administració.'],assignatures:['Comunicació empresarial','Tècnica comptable','Operacions administratives','Empresa i administració','Tractament informàtic','Anglès','FOL']},cfgm_info:{titol:'CFGM Informàtica',resum:'Cicle de grau mitjà d informàtica.',durada:'2 anys',final:'Tècnic informàtic o CFGS',cobres:'1400-1700 €',sou:'6.4',passos:['ESO','CFGM','CFGS o feina'],detalls:['Sistemes microinformàtics.'],assignatures:['Sistemes operatius','Xarxes locals','Seguretat','Aplicacions ofimàtiques','Muntatge i manteniment','FOL']},cfgs_admin:{titol:'CFGS Administració i Finances',resum:'Cicle superior d administració.',durada:'2 anys',final:'Tècnic superior o universitat',cobres:'1600-2000 €',sou:'6.2',passos:['CFGM','CFGS','Universitat o feina'],detalls:['Gestió empresarial.'],assignatures:['Gestió financera','RRHH','Comptabilitat','Logística','Simulació empresarial','FOL']},cfgs_daw:{titol:'CFGS DAW',resum:'Cicle superior de desenvolupament web.',durada:'2 anys',final:'Programador web o universitat',cobres:'1700-2300 €',sou:'7.1',passos:['CFGM','CFGS','Universitat o feina'],detalls:['Programació web.'],assignatures:['Programació','Bases de dades','HTML/CSS','JavaScript','Entorns de desenvolupament','FOL']},selectivitat:{titol:'Selectivitat',resum:'Proves d accés a la universitat.',durada:'Proves puntuals',final:'Universitat / Grau',cobres:'No cobres aquí',sou:'-',passos:['Batxillerat','Selectivitat'],detalls:['Serveix per accedir a la universitat.']},universitat:{titol:'Universitat / Grau',resum:'Estudis universitaris després de selectivitat o CFGS.',durada:'4 anys o més',final:'Feina',cobres:'Depèn de la carrera',sou:'Depèn',passos:['Selectivitat','Universitat'],detalls:['Hi ha molts graus diferents.']},sortides_cfgs:{titol:'Sortides / Feines',resum:'Sortides laborals segons l especialitat.',durada:'Depèn',final:'Feina',cobres:'Depèn del sector',sou:'Depèn',passos:['CFGS','Feina'],detalls:['Més especialització.']}};
+    const preguntesJoc=['Quin treball t agradaria fer de gran?','Quin itinerari creus que t agrada més ara mateix?','Prefereixes batxillerat, cicle, PTT o treballar?'];
+    const centresOlot={
+      bosc:{nom:'Institut Bosc de la Coma',adreca:'C/ Toledo, 12, Olot',batxillerats:['Batxillerat','Humanitats i Ciències Socials','Ciències i Tecnologia'],cicles:['Gestió Administrativa','Sistemes Microinformàtics i Xarxes','Comerç Internacional','Transport i Logística','ASIX','DAM','DAW'],descripcio:'Centre amb batxillerat i cicles de gestió, comerç i informàtica.'},
+      garrotxa:{nom:'Institut La Garrotxa',adreca:'Ctra. de Riudaura, 110, Olot',batxillerats:['Batxillerat'],cicles:['Producció Agropecuària','Jardineria i Floristeria','Construcció','Instal·lacions Elèctriques i Automàtiques','Mecanització','Elaboració de Productes Alimentaris','Ramaderia i Assistència en Sanitat Animal','Automatització i Robòtica Industrial','Programació de la Producció en Fabricació Mecànica','Programació de la Producció en Emmotllament','Mecatrònica Industrial','Laboratori Clínic i Biomèdic','Confecció i Moda','Patronatge i Moda','Cures Auxiliars d\'Infermeria'],descripcio:'Centre amb batxillerat i molts cicles tècnics, industrials, agraris, tèxtils i sanitaris.'},
+      art:{nom:'Escola d\'Art d\'Olot',adreca:'Carrer Pare Antoni Soler, 1, Olot',batxillerats:['Batxillerat d\'Arts'],cicles:['APGI','Revestiments Murals','Gràfica Publicitària','Decoració','Fotografia i Audiovisuals','Il·lustració','Producció de Personatge Escultòric'],descripcio:'Centre orientat a arts, disseny, imatge i estudis creatius.'}
+    };
+    const dadesGuardadesAlumnes = JSON.parse(localStorage.getItem('dadesAlumnesOrientacio') || '{}');
+    const dadesAlumnes={}; nomsClasse.forEach(n=>dadesAlumnes[n]=dadesGuardadesAlumnes[n]||{nota:'5',itinerari:'batxillerat',cicle:'',observacions:''});
+    let alumneActual='Pol', opcionsIAActuals=[], opcioIAEscollida=null, seleccioInternaIA=null;
+    const qs=id=>document.getElementById(id);
+    function mostrarPagina(p){ document.querySelectorAll('.page').forEach(e=>e.classList.remove('active')); qs(p).classList.add('active'); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); ({itineraris:'btnItineraris',classe:'btnClasse',pissarra:'btnPissarra',recorreguts:'btnRecorreguts',mapa:'btnMapa'})[p] && qs(({itineraris:'btnItineraris',classe:'btnClasse',pissarra:'btnPissarra',recorreguts:'btnRecorreguts',mapa:'btnMapa'})[p]).classList.add('active'); if(p==='recorreguts') renderRecorregutsGuardats(); if(p==='classe') renderStatsClasse(); }
+    function resetHighlightLines(){ document.querySelectorAll('.path-line').forEach(l=>l.classList.remove('green','blue','red')); }
+    function pintaRecorregut(lines,color){ lines.forEach(id=>{ const el=qs(id); if(el) el.classList.add(color); }); }
+    function aplicarPrevisualitzacioIA(){ resetHighlightLines(); if(opcionsIAActuals[0]) pintaRecorregut(opcionsIAActuals[0].lines,'green'); if(opcionsIAActuals[1]) pintaRecorregut(opcionsIAActuals[1].lines,'blue'); if(opcionsIAActuals[2]) pintaRecorregut(opcionsIAActuals[2].lines,'red'); }
+    function mostrarSeleccioAutomatica(t){ qs('triaAutomaticaIA').style.display='block'; qs('triaAutomaticaIAText').textContent=t; }
+    function renderRouteInfo(r){ qs('infoRuta').style.display='block'; qs('rutaTitol').textContent=r.titol; qs('rutaResum').textContent=r.resum||''; qs('rutaDurada').textContent=r.durada; qs('rutaFinal').textContent=r.final; qs('rutaCobres').textContent=r.cobres; qs('rutaSou').textContent=r.sou; const passos=qs('rutaPassos'); passos.innerHTML=''; r.passos.forEach(p=>{ const s=document.createElement('span'); s.className='badge'; s.textContent=p; passos.appendChild(s); }); const det=qs('rutaDetalls'); det.innerHTML=''; r.detalls.forEach(d=>{ const li=document.createElement('li'); li.textContent=d; det.appendChild(li); }); qs('itinerarisExtraBloc').style.display='grid'; qs('itinerarisNotaTall').textContent=r.sou||'-'; qs('itinerarisAssignatures').innerHTML=r.assignatures?'<ul>'+r.assignatures.map(a=>'<li>'+a+'</li>').join('')+'</ul>':'<p>Tria una opció per veure les assignatures.</p>'; }
+    function renderSubChoices(id){
+      const opc=qs('opcionsRuta');
+      opc.innerHTML='';
+      if(id==='batxillerat'){
+        opc.innerHTML=`
+          <h3>Batxillerats d'Olot</h3>
+          <p class="muted">Per presentar-ho a 3r d'ESO, és més clar veure primer el centre i després les modalitats.</p>
+          <div class="info-grid">
+            <div class="info-box">
+              <strong>Institut Bosc de la Coma</strong>
+              <p class="muted">Confirmat a la web oficial: famílies de cicles</p>
+              <p class="muted">Administració i gestió · Comerç i màrqueting · Informàtica i comunicacions</p>
+              <p class="muted">Adreça: C/ Toledo, 12, Olot</p>
+            </div>
+            <div class="info-box">
+              <strong>Institut La Garrotxa</strong>
+              <p class="muted">Confirmat a la web oficial: fan CFGM i CFGS, però aquí deixem la llista exacta pendent de completar quan es tingui tota la fitxa oficial visible.</p>
+              <p class="muted">Adreça: Ctra. de Riudaura, 110, Olot</p>
+            </div>
+            <div class="info-box">
+              <strong>Escola d'Art d'Olot</strong>
+              <p class="muted">Confirmat a la web oficial.</p>
+              <p class="muted">CFGM</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">APGI</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Revestiments Murals</button>
+              </div>
+              <p class="muted">CFGS</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Gràfica Publicitària</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Decoració</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Fotografia i Audiovisuals</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Il·lustració</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Producció de Personatge Escultòric</button>
+              </div>
+            </div>
+            </div>
+            </div>
+          </div>
+        `;
+      }
+      if(id==='cicles'){
+        opc.innerHTML=`
+          <h3>Cicles que pots fer a Olot</h3>
+          <p class="muted">Aquesta llista està pensada per explicar millor els centres i les opcions reals de la ciutat.</p>
+          <div class="info-grid">
+            <div class="info-box">
+              <strong>Institut Bosc de la Coma</strong>
+              <p class="muted">CFGM</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Gestió Administrativa</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_info" type="button">Sistemes Microinformàtics i Xarxes</button>
+              </div>
+              <p class="muted">CFGS</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Comerç Internacional</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Transport i Logística</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">ASIX</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">DAM</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_daw" type="button">DAW</button>
+              </div>
+            </div>
+            <div class="info-box">
+              <strong>Institut La Garrotxa</strong>
+              <p class="muted">CFGM</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Producció Agropecuària</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Jardineria i Floristeria</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Construcció</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Instal·lacions Elèctriques i Automàtiques</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Mecanització</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Elaboració de Productes Alimentaris</button>
+              </div>
+              <p class="muted">CFGS</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Ramaderia i Assistència en Sanitat Animal</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Automatització i Robòtica Industrial</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Programació de la Producció en Fabricació Mecànica</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Programació de la Producció en Emmotllament</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Mecatrònica Industrial</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Laboratori Clínic i Biomèdic</button>
+              </div>
+            </div>
+            <div class="info-box">
+              <strong>Escola d'Art d'Olot</strong>
+              <p class="muted">CFGM</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Assistència al Producte Gràfic Imprès</button>
+                <button class="badge-click subchoice-btn" data-route="cfgm_admin" type="button">Revestiments Murals</button>
+              </div>
+              <p class="muted">CFGS</p>
+              <div class="badges">
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Gràfica Publicitària</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Decoració</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Fotografia i Audiovisuals</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Il·lustració</button>
+                <button class="badge-click subchoice-btn" data-route="cfgs_admin" type="button">Producció de Personatge Escultòric</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+    function seleccionarRuta(id){ document.querySelectorAll('.svg-node,.subchoice-btn').forEach(n=>n.classList.remove('active')); document.querySelectorAll('[data-route="'+id+'"]').forEach(n=>n.classList.add('active')); const r=rutes[id]; if(!r) return; renderRouteInfo(r); renderSubChoices(id); }
+    function detectarSeleccioInterna(op){ const p=op.passos.join(' ').toLowerCase(); if(p.includes('human')) return {tipus:'batxillerat',id:'batx_humanistic',text:'Batxillerat Humanitats i Ciències Socials'}; if(p.includes('cient')) return {tipus:'batxillerat',id:'batx_cientific',text:'Batxillerat Científic'}; if(p.includes('tecnol')) return {tipus:'batxillerat',id:'batx_tecnologic',text:'Batxillerat Tecnològic'}; if(p.includes('arts')) return {tipus:'batxillerat',id:'batx_arts',text:'Batxillerat Arts'}; if(p.includes('gestió administrativa')) return {tipus:'cicles',id:'cfgm_admin',text:'CFGM Gestió Administrativa'}; if(p.includes('inform')) return {tipus:'cicles',id:'cfgm_info',text:'CFGM Informàtica'}; if(p.includes('finances')) return {tipus:'cicles',id:'cfgs_admin',text:'CFGS Administració i Finances'}; if(p.includes('daw')) return {tipus:'cicles',id:'cfgs_daw',text:'CFGS DAW'}; if(p.includes('ptt')) return {tipus:'ptt',id:'ptt',text:'PTT / PFI'}; if(p.includes('treball')) return {tipus:'treballar',id:'treballar',text:'Treballar'}; return null; }
+    function keywordScore(t,w){ let s=0; w.forEach(x=>{ if(t.includes(x)) s++; }); return s; }
+    function generarOpcionsOrientacio(text){ const t=text.toLowerCase(); const salut=keywordScore(t,['ajudar','persones','salut','biologia']); const tec=keywordScore(t,['ordinador','informatica','informàtica','programar','web']); const social=keywordScore(t,['empresa','dret','idiomes','economia','social']); const art=keywordScore(t,['dibuixar','art','disseny','creatiu']); const practic=keywordScore(t,['practic','pràctic','feina','curt']); const verda=(tec>=salut&&tec>=social&&tec>=art)?{nom:'Opció verda: camí tecnològic',color:'green',resum:'Interès tecnològic o digital.',perque:'Combina una via pràctica amb sortides fortes.',passos:['ESO','Cicles d Olot','CFGM Informàtica','CFGS DAW','Sortides / Feines'],lines:['line-eso-cicles','line-cicles-cfgm-info','line-cfgm-info-cfgs-daw','line-cfgs-daw-sortides']}:{nom:'Opció verda: camí pràctic',color:'green',resum:'Perfil pràctic.',perque:'Els cicles permeten una via concreta i útil.',passos:['ESO','Cicles d Olot','CFGM Gestió Administrativa','CFGS Administració i Finances','Sortides / Feines'],lines:['line-eso-cicles','line-cicles-cfgm-admin','line-cfgm-admin-cfgs-admin','line-cfgs-admin-sortides']}; const blava=(social>=salut&&social>=art)?{nom:'Opció blava: batxillerat humanístic / social',color:'blue',resum:'Perfil social o d empresa.',perque:'Manté oberta la porta a la universitat.',passos:['ESO','Batxillerat','Batx Humanístic / Social','Selectivitat','Universitat / Grau'],lines:['line-eso-batxillerat','line-batx-selectivitat','line-selectivitat-universitat']}:(salut>art?{nom:'Opció blava: batxillerat científic',color:'blue',resum:'Perfil de salut o ciències.',perque:'Et prepara per estudis superiors científics.',passos:['ESO','Batxillerat','Batxillerat Científic','Selectivitat','Universitat / Grau'],lines:['line-eso-batxillerat','line-batx-selectivitat','line-selectivitat-universitat']}:{nom:'Opció blava: batxillerat tecnològic',color:'blue',resum:'Perfil tecnològic acadèmic.',perque:'Et prepara per estudis tècnics universitaris.',passos:['ESO','Batxillerat','Batxillerat Tecnològic','Selectivitat','Universitat / Grau'],lines:['line-eso-batxillerat','line-batx-selectivitat','line-selectivitat-universitat']}); const vermella=practic>=2?{nom:'Opció vermella: via curta i directa',color:'red',resum:'Via més curta.',perque:'PTT / PFI pot ajudar-te a decidir després.',passos:['ESO','PTT / PFI','CFGM o feina'],lines:['line-eso-ptt']}:(art>salut&&art>social?{nom:'Opció vermella: batxillerat arts',color:'red',resum:'Perfil creatiu.',perque:'Via coherent per perfils artístics.',passos:['ESO','Batxillerat','Batx Arts','Selectivitat o estudis artístics'],lines:['line-eso-batxillerat','line-batx-selectivitat']}:{nom:'Opció vermella: començar a treballar',color:'red',resum:'Entrada directa al món laboral.',perque:'És l opció més immediata.',passos:['ESO','Treballar'],lines:['line-eso-treballar']}); return [verda,blava,vermella]; }
+    function renderOpcionsIA(){ const box=qs('opcionsIA'); box.innerHTML=''; opcionsIAActuals.forEach((op,i)=>{ const div=document.createElement('div'); div.className='option-card '+op.color; const c=op.color==='green'?'success':op.color==='blue'?'blue':'red'; div.innerHTML='<h4>'+op.nom+'</h4><p>'+op.resum+'</p><p><strong>Passos:</strong> '+op.passos.join(' → ')+'</p><button class="btn '+c+' select-ai-option" data-index="'+i+'" type="button">Marcar</button>'; box.appendChild(div); }); }
+    function actualitzarResumProfessora(op){ qs('resumProfessora').innerHTML=op?'<strong>'+op.nom+'</strong><br><br>'+op.perque+'<br><br><strong>Passos:</strong> '+op.passos.join(' → '):'Encara no hi ha cap recorregut seleccionat.'; }
+    function addChatMessage(text,who,target){ const box=qs(target); const div=document.createElement('div'); div.className='msg '+who; div.textContent=text; box.appendChild(div); box.scrollTop=box.scrollHeight; }
+    function guardarXat(idClau, elementId){ const box = qs(elementId); if(box) localStorage.setItem(idClau, box.innerHTML); }
+    function restaurarXat(idClau, elementId){ const box = qs(elementId); const html = localStorage.getItem(idClau); if(box && html) box.innerHTML = html; }
+    function enviarMissatgeAI(){ const input=qs('entradaAI'); const text=input.value.trim(); if(!text) return; addChatMessage(text,'user','chatAI'); opcionsIAActuals=generarOpcionsOrientacio(text); renderOpcionsIA(); aplicarPrevisualitzacioIA(); addChatMessage('He preparat 3 recorreguts. Marca una opció i seleccionaré també la part interna del camí.','ai','chatAI'); input.value=''; guardarXat('xatAIOrientacio','chatAI'); guardarEstatIA(); }
+    function escollirOpcioIA(index){ const op=opcionsIAActuals[index]; if(!op) return; opcioIAEscollida=op; seleccioInternaIA=detectarSeleccioInterna(op); qs('detallOpcioEscollida').innerHTML='<strong>'+op.nom+'</strong><br>'+op.perque; actualitzarResumProfessora(op); if(seleccioInternaIA){ mostrarSeleccioAutomatica('Selecció automàtica: '+seleccioInternaIA.text); if(seleccioInternaIA.tipus==='cicles') seleccionarRuta('cicles'); if(seleccioInternaIA.tipus==='batxillerat') seleccionarRuta('batxillerat'); setTimeout(()=>seleccionarRuta(seleccioInternaIA.id),20); } addChatMessage('Has marcat '+op.nom+'. '+op.perque,'ai','chatAI'); guardarXat('xatAIOrientacio','chatAI'); guardarEstatIA(); }
+    function obtenirRecorregutsGuardats(){ return JSON.parse(localStorage.getItem('recorregutsOrientacio')||'[]'); }
+    function guardarRecorregutIA(){ if(!opcioIAEscollida){ addChatMessage('Primer marca una opció.','ai','chatAI'); guardarXat('xatAIOrientacio','chatAI'); return; } const nom=qs('nomRecorregut').value.trim()||opcioIAEscollida.nom; const guardats=obtenirRecorregutsGuardats(); guardats.push({nom,...opcioIAEscollida,seleccioInterna:seleccioInternaIA}); localStorage.setItem('recorregutsOrientacio',JSON.stringify(guardats)); nouCamíIA(); renderRecorregutsGuardats(); guardarXat('xatAIOrientacio','chatAI'); }
+    function carregarRecorregutGuardat(index){ const item=obtenirRecorregutsGuardats()[index]; if(!item) return; opcionsIAActuals=[item]; opcioIAEscollida=item; seleccioInternaIA=item.seleccioInterna||null; renderOpcionsIA(); resetHighlightLines(); pintaRecorregut(item.lines,item.color); qs('detallOpcioEscollida').innerHTML='<strong>'+item.nom+'</strong><br>'+item.perque; if(item.seleccioInterna){ mostrarSeleccioAutomatica('Recorregut carregat: '+item.seleccioInterna.text); if(item.seleccioInterna.tipus==='cicles') seleccionarRuta('cicles'); if(item.seleccioInterna.tipus==='batxillerat') seleccionarRuta('batxillerat'); setTimeout(()=>seleccionarRuta(item.seleccioInterna.id),20); } mostrarPagina('itineraris'); }
+    function eliminarRecorregutGuardat(index){ const g=obtenirRecorregutsGuardats(); g.splice(index,1); localStorage.setItem('recorregutsOrientacio',JSON.stringify(g)); renderRecorregutsGuardats(); }
+    function renderRecorregutsGuardats(){ const box=qs('llistaRecorreguts'); const g=obtenirRecorregutsGuardats(); box.innerHTML=g.length?g.map((r,i)=>'<div class="saved-route"><strong>'+r.nom+'</strong><p>'+r.resum+'</p><div class="row"><button class="btn secondary view-saved-route" data-index="'+i+'" type="button">Veure</button><button class="btn danger delete-saved-route" data-index="'+i+'" type="button">Esborrar</button></div></div>').join(''):'<p class="muted">Encara no hi ha recorreguts guardats.</p>'; }
+    function guardarEstatIA(){ localStorage.setItem('estatIAOrientacio', JSON.stringify({ opcionsIAActuals, opcioIAEscollida, seleccioInternaIA, nomRecorregut: qs('nomRecorregut') ? qs('nomRecorregut').value : '', entradaAI: qs('entradaAI') ? qs('entradaAI').value : '', detall: qs('detallOpcioEscollida') ? qs('detallOpcioEscollida').innerHTML : '', resumProfessora: qs('resumProfessora') ? qs('resumProfessora').innerHTML : '', triaAutomaticaVisible: qs('triaAutomaticaIA') ? qs('triaAutomaticaIA').style.display : 'none', triaAutomaticaText: qs('triaAutomaticaIAText') ? qs('triaAutomaticaIAText').textContent : '' })); }
+    function restaurarEstatIA(){ const estat = JSON.parse(localStorage.getItem('estatIAOrientacio') || 'null'); if(!estat) return; opcionsIAActuals = estat.opcionsIAActuals || []; opcioIAEscollida = estat.opcioIAEscollida || null; seleccioInternaIA = estat.seleccioInternaIA || null; if(qs('nomRecorregut')) qs('nomRecorregut').value = estat.nomRecorregut || ''; if(qs('entradaAI')) qs('entradaAI').value = estat.entradaAI || ''; if(qs('detallOpcioEscollida')) qs('detallOpcioEscollida').innerHTML = estat.detall || 'Encara no has triat cap recorregut.'; if(qs('resumProfessora')) qs('resumProfessora').innerHTML = estat.resumProfessora || 'Encara no hi ha cap recorregut seleccionat.'; if(qs('triaAutomaticaIA')) qs('triaAutomaticaIA').style.display = estat.triaAutomaticaVisible || 'none'; if(qs('triaAutomaticaIAText')) qs('triaAutomaticaIAText').textContent = estat.triaAutomaticaText || ''; renderOpcionsIA(); if(opcionsIAActuals.length) aplicarPrevisualitzacioIA(); }
+    function nouCamíIA(){ opcionsIAActuals=[]; opcioIAEscollida=null; seleccioInternaIA=null; qs('opcionsIA').innerHTML=''; qs('detallOpcioEscollida').textContent='Encara no has triat cap recorregut.'; qs('nomRecorregut').value=''; qs('entradaAI').value=''; resetHighlightLines(); actualitzarResumProfessora(null); qs('triaAutomaticaIA').style.display='none'; guardarEstatIA(); }
+    function esborrarOpcionsIA(){ nouCamíIA(); }
+    function crearLlistaAlumnes(){ const box=qs('llistaAlumnes'); box.innerHTML=''; nomsClasse.forEach(n=>{ const b=document.createElement('button'); b.className='alumne-btn'+(n===alumneActual?' active':''); b.dataset.nom=n; b.type='button'; b.textContent=n; box.appendChild(b); }); }
+    function seleccionarAlumne(nom){ localStorage.setItem('alumneActualOrientacio', nom); alumneActual=nom; crearLlistaAlumnes(); qs('fitxaNom').textContent='Fitxa de '+nom; qs('nota').value=dadesAlumnes[nom].nota; qs('itinerari').value=dadesAlumnes[nom].itinerari; qs('cicle').value=dadesAlumnes[nom].cicle; qs('observacions').value=dadesAlumnes[nom].observacions; actualitzarMiniEsquema(); }
+    function guardarDadesAlumnes(){ localStorage.setItem('dadesAlumnesOrientacio', JSON.stringify(dadesAlumnes)); }
+    function guardarCamp(camp,v){ dadesAlumnes[alumneActual][camp]=v; guardarDadesAlumnes(); actualitzarMiniEsquema(); renderStatsClasse(); }
+    function actualitzarMiniEsquema(){ const it=dadesAlumnes[alumneActual].itinerari; const ruta=rutes[it]||rutes.batxillerat; qs('miniPas').textContent=ruta.titol; qs('miniDurada').textContent=ruta.durada; qs('miniFinal').textContent=ruta.final; let nota=ruta.sou,cobra=ruta.cobres,ass=ruta.assignatures?ruta.assignatures.join(', '):'Depèn de l itinerari o del cicle.'; const d=(dadesAlumnes[alumneActual].cicle||'').toLowerCase(); if(it==='batxillerat'){ if(d.includes('human')){ nota=rutes.batx_humanistic.sou; cobra=rutes.batx_humanistic.cobres; ass=rutes.batx_humanistic.assignatures.join(', ');} else if(d.includes('cient')){ nota=rutes.batx_cientific.sou; cobra=rutes.batx_cientific.cobres; ass=rutes.batx_cientific.assignatures.join(', ');} else if(d.includes('tecno')){ nota=rutes.batx_tecnologic.sou; cobra=rutes.batx_tecnologic.cobres; ass=rutes.batx_tecnologic.assignatures.join(', ');} else if(d.includes('art')){ nota=rutes.batx_arts.sou; cobra=rutes.batx_arts.cobres; ass=rutes.batx_arts.assignatures.join(', ');} else { nota='5'; ass='Escriu científic, tecnològic, humanístic o arts'; } } else if(it==='cicles'){ if(d.includes('admin') && !d.includes('finan')){ nota=rutes.cfgm_admin.sou; cobra=rutes.cfgm_admin.cobres; ass=rutes.cfgm_admin.assignatures.join(', ');} else if(d.includes('info')){ nota=rutes.cfgm_info.sou; cobra=rutes.cfgm_info.cobres; ass=rutes.cfgm_info.assignatures.join(', ');} else if(d.includes('finan')){ nota=rutes.cfgs_admin.sou; cobra=rutes.cfgs_admin.cobres; ass=rutes.cfgs_admin.assignatures.join(', ');} else if(d.includes('daw') || d.includes('web')){ nota=rutes.cfgs_daw.sou; cobra=rutes.cfgs_daw.cobres; ass=rutes.cfgs_daw.assignatures.join(', ');} else { nota='Depèn del cicle'; cobra='Depèn del cicle'; ass='Escriu un cicle concret per veure les assignatures.'; } } else if(it==='ptt'){ nota='No fixa'; ass=rutes.ptt.assignatures.join(', ');} else if(it==='treballar'){ nota='No cal'; ass='No hi ha assignatures perquè vas a treballar.'; } qs('miniNota').textContent=nota; qs('miniCobra').textContent=cobra; qs('nomsNotaTall').textContent=nota; qs('nomsAssignatures').textContent=ass; }
+    function filtrarAlumnes(){ const t=qs('cercador').value.toLowerCase(); document.querySelectorAll('.alumne-btn').forEach(b=>{ b.style.display=b.textContent.toLowerCase().includes(t)?'block':'none'; }); }
+    function resumOrientacioAlumne(text){ return generarOpcionsOrientacio(text)[0]; }
+    function aplicarCanvisAlumneDesDeText(text){ const t=text.toLowerCase(); let canvi='No s ha detectat cap canvi automàtic clar.'; if(t.includes('dibuix')||t.includes('art')||t.includes('creatiu')){ dadesAlumnes[alumneActual].itinerari='batxillerat'; dadesAlumnes[alumneActual].cicle='arts'; dadesAlumnes[alumneActual].observacions='Orientació AI: perfil creatiu, possible batxillerat arts.'; canvi='He canviat directament la configuració cap a Batxillerat Arts.'; } else if(t.includes('ajudar')||t.includes('persones')||t.includes('salut')){ dadesAlumnes[alumneActual].itinerari='batxillerat'; dadesAlumnes[alumneActual].cicle='científic'; dadesAlumnes[alumneActual].observacions='Orientació AI: possible batxillerat científic.'; canvi='He canviat directament la configuració cap a Batxillerat Científic.'; } else if(t.includes('ordinador')||t.includes('program')||t.includes('web')||t.includes('info')){ dadesAlumnes[alumneActual].itinerari='cicles'; dadesAlumnes[alumneActual].cicle='daw'; dadesAlumnes[alumneActual].observacions='Orientació AI: possible camí tecnològic amb DAW.'; canvi='He canviat directament la configuració cap a Cicles, concretament DAW.'; } else if(t.includes('empresa')||t.includes('economia')||t.includes('administr')){ dadesAlumnes[alumneActual].itinerari='cicles'; dadesAlumnes[alumneActual].cicle='administració i finances'; dadesAlumnes[alumneActual].observacions='Orientació AI: possible camí d administració i finances.'; canvi='He canviat directament la configuració cap a Cicles, administració i finances.'; } else if(t.includes('practic')||t.includes('pràctic')||t.includes('curt')){ dadesAlumnes[alumneActual].itinerari='ptt'; dadesAlumnes[alumneActual].cicle=''; dadesAlumnes[alumneActual].observacions='Orientació AI: pot necessitar una via de transició més flexible.'; canvi='He canviat directament la configuració cap a PTT / PFI.'; } qs('itinerari').value=dadesAlumnes[alumneActual].itinerari; qs('cicle').value=dadesAlumnes[alumneActual].cicle; qs('observacions').value=dadesAlumnes[alumneActual].observacions; guardarDadesAlumnes(); actualitzarMiniEsquema(); renderStatsClasse(); return canvi; }
+    function processarChatAlumne(){ const input=qs('nomsAIText'); const text=input.value.trim(); if(!text) return; addChatMessage(text,'user','chatNomsAI'); const millor=resumOrientacioAlumne(text); const canvi=aplicarCanvisAlumneDesDeText(text); qs('nomsAIResposta').innerHTML='<strong>Orientació recomanada:</strong> '+millor.nom+'<br><br>'+millor.perque+'<br><br><strong>Canvi aplicat:</strong> '+canvi; addChatMessage('Per a '+alumneActual+', la millor orientació detectada ara mateix és: '+millor.nom+'. '+millor.perque+' '+canvi,'ai','chatNomsAI'); input.value=''; localStorage.setItem('nomsAIRespostaOrientacio', qs('nomsAIResposta').innerHTML); guardarXat('xatNomsOrientacio','chatNomsAI'); }
+    function netejarChatAlumne(){ qs('chatNomsAI').innerHTML=''; qs('nomsAIResposta').textContent='Encara no hi ha orientació generada.'; localStorage.removeItem('xatNomsOrientacio'); localStorage.removeItem('nomsAIRespostaOrientacio'); }
+    function renderStatsClasse(){ const s=qs('statsClasse'); const c={batxillerat:0,cicles:0,ptt:0,treballar:0}; Object.values(dadesAlumnes).forEach(d=>c[d.itinerari]++); s.innerHTML='<span class="stat-pill">Batxillerat: '+c.batxillerat+'</span><span class="stat-pill">Cicles: '+c.cicles+'</span><span class="stat-pill">PTT / PFI: '+c.ptt+'</span><span class="stat-pill">Treballar: '+c.treballar+'</span>'; }
+    function renderPissarra(){ const caixa=qs('llistaPissarra'); const dades=JSON.parse(localStorage.getItem('pissarraOrientacio')||'[]'); caixa.innerHTML=dades.length?'<ul>'+dades.map((t,i)=>'<li style="margin-bottom:8px;">'+t+' <button class="badge-click delete-board-item" data-index="'+i+'" type="button">Esborrar</button></li>').join('')+'</ul>':'<p class="muted">Encara no hi ha res escrit al tauler del joc.</p>'; }
+    function novaPreguntaJoc(){ const pregunta = preguntesJoc[Math.floor(Math.random()*preguntesJoc.length)]; qs('preguntaJoc').textContent=pregunta; localStorage.setItem('preguntaActualOrientacio', pregunta); }
+    function afegirRespostaJoc(){ const input=qs('respostaJoc'); const text=input.value.trim(); if(!text) return; const dades=JSON.parse(localStorage.getItem('pissarraOrientacio')||'[]'); dades.push('Pregunta: '+qs('preguntaJoc').textContent+' | Resposta: '+text); localStorage.setItem('pissarraOrientacio',JSON.stringify(dades)); input.value=''; renderPissarra(); localStorage.setItem('preguntaActualOrientacio', qs('preguntaJoc').textContent); }
+    function afegirTextDirecte(text){ const dades=JSON.parse(localStorage.getItem('pissarraOrientacio')||'[]'); dades.push(text); localStorage.setItem('pissarraOrientacio',JSON.stringify(dades)); renderPissarra(); }
+    function esborrarPissarra(index){ const dades=JSON.parse(localStorage.getItem('pissarraOrientacio')||'[]'); dades.splice(index,1); localStorage.setItem('pissarraOrientacio',JSON.stringify(dades)); renderPissarra(); }
+    function netejarPissarra(){ localStorage.removeItem('pissarraOrientacio'); renderPissarra(); novaPreguntaJoc(); }
+    function missatgeInicialIA(){ addChatMessage('Hola. Sóc l assistent orientador de la web. Explica m què t agrada i et recomanaré 3 recorreguts.','ai','chatAI'); }
+    function textCentreComplet(centre){ return centre.batxillerats.concat(centre.cicles).join(' · ').toLowerCase(); }
+    function pintaEstrelles(n){ return '<span class="stars">'+'★'.repeat(n)+'☆'.repeat(5-n)+'</span>'; }
+    function calculaEstrellesCentre(query, centre){ if(!query.trim()) return 0; const q=query.toLowerCase(); const text=textCentreComplet(centre); let score=1; if(text.includes(q)) score=5; else { const paraules=q.split(/\s+/).filter(Boolean); let coincidencies=0; paraules.forEach(function(p){ if(text.includes(p)) coincidencies++; }); if(coincidencies>=3) score=5; else if(coincidencies===2) score=4; else if(coincidencies===1) score=3; if(q.includes('art') && centre.nom.toLowerCase().includes('art')) score=5; if((q.includes('daw')||q.includes('dam')||q.includes('asix')||q.includes('inform')) && centre.nom.toLowerCase().includes('bosc')) score=Math.max(score,5); if((q.includes('mec')||q.includes('robot')||q.includes('laboratori')||q.includes('jardiner')||q.includes('agro')||q.includes('infermer')) && centre.nom.toLowerCase().includes('garrotxa')) score=Math.max(score,5); } return Math.min(5, score); }
+    function mostrarCentreMapa(id){ const centre=centresOlot[id]; if(!centre) return; document.querySelectorAll('.mapa-marker').forEach(function(m){ m.classList.remove('active'); }); const mk=qs('marker-'+id); if(mk) mk.classList.add('active'); qs('infoCentreMapa').innerHTML='<strong>'+centre.nom+'</strong><p class="muted">'+centre.adreca+'</p><p>'+centre.descripcio+'</p><p><strong>Batxillerats:</strong></p><div class="badges">'+centre.batxillerats.map(function(b){ return '<span class="badge">'+b+'</span>'; }).join('')+'</div><p style="margin-top:12px;"><strong>Cicles:</strong></p><div class="badges">'+centre.cicles.map(function(c){ return '<span class="badge">'+c+'</span>'; }).join('')+'</div>'; localStorage.setItem('centreMapaSeleccionatOrientacio', id); }
+    function renderRankingMapa(){ if(!qs('buscadorMapa')) return; const query=(qs('buscadorMapa').value||'').trim(); const llista=Object.keys(centresOlot).map(function(id){ return {id:id, centre:centresOlot[id], score:calculaEstrellesCentre(query, centresOlot[id])}; }).sort(function(a,b){ return b.score-a.score; }); if(!query){ qs('resumMapa').innerHTML='Encara no has buscat cap estudi.'; qs('rankingCentresMapa').innerHTML='Encara no hi ha cap valoració.'; document.querySelectorAll('.mapa-marker').forEach(function(m){ m.classList.remove('match'); }); return; } qs('rankingCentresMapa').innerHTML=llista.map(function(item,index){ return '<div class="centre-rank '+(index===0?'top':'')+'"><strong>'+item.centre.nom+'</strong><br>'+pintaEstrelles(item.score)+'</div>'; }).join(''); const millor=llista[0]; qs('resumMapa').innerHTML='<strong>Millor coincidència per a:</strong> '+query+'<br><br><strong>Centre destacat:</strong> '+millor.centre.nom+'<br><strong>Puntuació orientativa:</strong> '+millor.score+'/5'; document.querySelectorAll('.mapa-marker').forEach(function(m){ m.classList.remove('match'); }); llista.filter(function(x){ return x.score>=4; }).forEach(function(x){ const marker=qs('marker-'+x.id); if(marker) marker.classList.add('match'); }); mostrarCentreMapa(millor.id); localStorage.setItem('buscadorMapaOrientacio', query); }
+    function netejarMapa(){ if(qs('buscadorMapa')) qs('buscadorMapa').value=''; localStorage.removeItem('buscadorMapaOrientacio'); renderRankingMapa(); }
+
+    document.addEventListener('click', (e)=>{
+      const rt=e.target.closest('[data-route]'); if(rt) seleccionarRuta(rt.dataset.route);
+      const opt=e.target.closest('.select-ai-option'); if(opt) escollirOpcioIA(Number(opt.dataset.index));
+      const view=e.target.closest('.view-saved-route'); if(view) carregarRecorregutGuardat(Number(view.dataset.index));
+      const del=e.target.closest('.delete-saved-route'); if(del) eliminarRecorregutGuardat(Number(del.dataset.index));
+      const al=e.target.closest('.alumne-btn'); if(al) seleccionarAlumne(al.dataset.nom);
+      const qb=e.target.closest('[data-quick-board]'); if(qb) afegirTextDirecte(qb.getAttribute('data-quick-board'));
+      const bd=e.target.closest('.delete-board-item'); if(bd) esborrarPissarra(Number(bd.dataset.index));
+      const cm=e.target.closest('.mapa-marker'); if(cm) mostrarCentreMapa(cm.dataset.centre);
+    });
+    qs('btnItineraris').onclick=()=>mostrarPagina('itineraris');
+    qs('btnClasse').onclick=()=>mostrarPagina('classe');
+    qs('btnPissarra').onclick=()=>mostrarPagina('pissarra');
+    qs('btnRecorreguts').onclick=()=>mostrarPagina('recorreguts');
+    qs('btnMapa').onclick = () => {
+      mostrarPagina('mapa');
+      setTimeout(function(){
+        if (typeof mapaLeafletOverride !== 'undefined' && mapaLeafletOverride) {
+          mapaLeafletOverride.invalidateSize(true);
+          mapaLeafletOverride.setView([42.1798, 2.4890], mapaLeafletOverride.getZoom(), { animate:false });
+        }
+      }, 120);
+    };
+    if(qs('buscarMapa')) qs('buscarMapa').onclick=renderRankingMapa;
+    if(qs('netejarMapa')) qs('netejarMapa').onclick=netejarMapa;
+    if(qs('buscadorMapa')) qs('buscadorMapa').oninput=function(){ localStorage.setItem('buscadorMapaOrientacio', qs('buscadorMapa').value); renderRankingMapa(); }; 
+    qs('sendAI').onclick=enviarMissatgeAI; qs('newPathAI').onclick=nouCamíIA; qs('saveRoute').onclick=guardarRecorregutIA; qs('clearRoutePreview').onclick=esborrarOpcionsIA; qs('processStudentAI').onclick=processarChatAlumne; qs('clearStudentAI').onclick=netejarChatAlumne; qs('newQuestion').onclick=novaPreguntaJoc; qs('addAnswer').onclick=afegirRespostaJoc; qs('resetBoard').onclick=netejarPissarra;
+    qs('cercador').oninput=filtrarAlumnes; qs('nota').oninput=e=>guardarCamp('nota',e.target.value); qs('itinerari').onchange=e=>guardarCamp('itinerari',e.target.value); qs('cicle').oninput=e=>guardarCamp('cicle',e.target.value); qs('observacions').oninput=e=>guardarCamp('observacions',e.target.value);
+    crearLlistaAlumnes(); const alumneGuardat = localStorage.getItem('alumneActualOrientacio') || 'Pol'; seleccionarAlumne(alumneGuardat); renderStatsClasse(); renderPissarra(); renderRecorregutsGuardats(); const preguntaGuardada = localStorage.getItem('preguntaActualOrientacio'); if(preguntaGuardada){ qs('preguntaJoc').textContent = preguntaGuardada; } else { novaPreguntaJoc(); } restaurarXat('xatAIOrientacio','chatAI'); restaurarXat('xatNomsOrientacio','chatNomsAI'); if(localStorage.getItem('nomsAIRespostaOrientacio')) qs('nomsAIResposta').innerHTML = localStorage.getItem('nomsAIRespostaOrientacio'); restaurarEstatIA(); if(!qs('chatAI').innerHTML.trim()) missatgeInicialIA();
+    if(qs('buscadorMapa')) qs('buscadorMapa').value=localStorage.getItem('buscadorMapaOrientacio')||'';
+    if(qs('infoCentreMapa')) mostrarCentreMapa(localStorage.getItem('centreMapaSeleccionatOrientacio')||'bosc');
+    if(qs('rankingCentresMapa')) renderRankingMapa();
+  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    centresOlot.bosc = { nom:'Institut Bosc de la Coma', adreca:'C/ Toledo, 12, Olot', coords:[42.1759,2.4826], color:'#2563eb', batxillerats:['Humanitats i Ciències Socials','Ciències i Tecnologia'], cicles:['CFGM Gestió Administrativa','CFGM Sistemes Microinformàtics i Xarxes','CFGS Administració i Finances (DUAL)','CFGS Comerç Internacional (DUAL)','CFGS Transport i Logística (DUAL)','CFGS Administració de Sistemes Informàtics en Xarxa (DUAL)','CFGS Desenvolupament d’Aplicacions Multiplataforma (DUAL)','CFGS Desenvolupament d’Aplicacions Web (DUAL)'], descripcio:'Centre amb batxillerat i cicles de gestió, comerç i informàtica.' };
+    centresOlot.garrotxa = { nom:'Institut La Garrotxa', adreca:'Ctra. de Riudaura, 110, Olot', coords:[42.1738,2.4897], color:'#16a34a', batxillerats:['Ciències i Tecnologia','Humanitats i Ciències Socials'], cicles:['CFGM Producció Agropecuària','CFGM Jardineria i Floristeria','CFGM Elaboració de Productes Alimentaris','CFGM Instal·lacions Elèctriques i Automàtiques','CFGM Manteniment Electromecànic','CFGM Mecanització','CFGM Confecció i Moda','CFGM Cures Auxiliars d’Infermeria','CFGM Construcció','CFGS Ramaderia i Assistència en Sanitat Animal','CFGS Fabricació Mecànica, Emmotllament i Disseny','CFGS Automatització i Robòtica Industrial','CFGS Mecatrònica Industrial','CFGS Patronatge i Moda','CFGS Laboratori Clínic i Biomèdic'], descripcio:'Centre amb batxillerat i molts cicles tècnics, industrials, agraris, tèxtils i sanitaris.' };
+    centresOlot.art = { nom:'Escola d\'Art d\'Olot', adreca:'Carrer Pare Antoni Soler, 1, Olot', coords:[42.1812,2.4882], color:'#dc2626', batxillerats:['Batxillerat d’Arts'], cicles:['CFGM APGI','CFGM Revestiments Murals','CFGS Gràfica Publicitària','CFGS Decoració','CFGS Fotografia i Audiovisuals','CFGS Il·lustració','CFGS Producció de Personatge Escultòric'], descripcio:'Centre orientat a arts, disseny, imatge i estudis creatius.' };
+
+    let mapaLeafletOverride = null;
+    let markersMapaOverride = {};
+
+    function getOpcionsMapaOverride(tipus){
+      const conjunt = new Set();
+      Object.values(centresOlot).forEach(function(c){
+        (tipus==='batxillerat' ? c.batxillerats : c.cicles).forEach(function(x){ conjunt.add(x); });
+      });
+      return Array.from(conjunt).sort(function(a,b){ return a.localeCompare(b,'ca'); });
+    }
+
+    function omplirDesplegableMapaOverride(){
+      const tipus = qs('tipusMapa') ? qs('tipusMapa').value : 'batxillerat';
+      const sel = qs('opcioMapa');
+      if(!sel) return;
+      const opcions = getOpcionsMapaOverride(tipus);
+      sel.innerHTML = '<option value="">Tria una opció...</option>' + opcions.map(function(op){ return '<option value="'+op.replace(/"/g,'&quot;')+'">'+op+'</option>'; }).join('');
+      const guardada = localStorage.getItem('opcioMapaOrientacio') || '';
+      if(opcions.indexOf(guardada)!==-1) sel.value = guardada;
+    }
+
+    function popupCentreOverride(centre){
+      return '<strong>'+centre.nom+'</strong><br>'+centre.adreca+'<br><em>'+centre.descripcio+'</em>';
+    }
+
+    function crearMapaLeafletOverride(){
+      if(mapaLeafletOverride || !qs('mapaLeaflet') || typeof L==='undefined') return;
+      mapaLeafletOverride = L.map('mapaLeaflet').setView([42.1798,2.4890], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(mapaLeafletOverride);
+      Object.keys(centresOlot).forEach(function(id){
+        const centre = centresOlot[id];
+        const marker = L.circleMarker(centre.coords,{ radius:10, color:centre.color, fillColor:centre.color, fillOpacity:0.9, weight:3 }).addTo(mapaLeafletOverride).bindPopup(popupCentreOverride(centre));
+        marker.on('click', function(){ mostrarCentreMapa(id); });
+        markersMapaOverride[id]=marker;
+      });
+    }
+
+    function actualitzarMarkersMapaOverride(destacats, actiu){
+      Object.keys(markersMapaOverride).forEach(function(id){
+        const marker = markersMapaOverride[id];
+        const centre = centresOlot[id];
+        const esDestacat = destacats.indexOf(id)!==-1;
+        const esActiu = id===actiu;
+        marker.setStyle({ radius: esDestacat ? 14 : 10, color: esActiu ? '#111827' : centre.color, fillColor: centre.color, fillOpacity:0.95, weight: esActiu ? 5 : 3 });
+      });
+    }
+
+    mostraCentreMapaOriginal = typeof mostrarCentreMapa === 'function' ? mostrarCentreMapa : null;
+    mostrarCentreMapa = function(id){
+      const centre = centresOlot[id];
+      if(!centre || !qs('infoCentreMapa')) return;
+      const tipus = qs('tipusMapa') ? qs('tipusMapa').value : 'batxillerat';
+      const titol = tipus==='batxillerat' ? 'Batxillerats' : 'Cicles';
+      const llista = tipus==='batxillerat' ? centre.batxillerats : centre.cicles;
+      const recomanat = localStorage.getItem('centreRecomanatMapaOrientacio') || '';
+      qs('infoCentreMapa').innerHTML = '<strong>'+centre.nom+'</strong><p class="muted">'+centre.adreca+'</p><p>'+centre.descripcio+'</p><p><strong>'+titol+':</strong></p><div class="badges">'+llista.map(function(x){ return '<span class="badge">'+x+'</span>'; }).join('')+'</div>' + (recomanat===centre.nom ? '<p style="margin-top:12px;"><strong>Centre recomanat ara mateix.</strong></p>' : '');
+      localStorage.setItem('centreMapaSeleccionatOrientacio', id);
+      if(markersMapaOverride[id]){ markersMapaOverride[id].openPopup(); actualitzarMarkersMapaOverride([], id); }
+    };
+
+    renderRankingMapa = function(){
+      const tipus = qs('tipusMapa') ? qs('tipusMapa').value : 'batxillerat';
+      const opcio = qs('opcioMapa') ? qs('opcioMapa').value : '';
+      if(!opcio){
+        if(qs('resumMapa')) qs('resumMapa').innerHTML = 'Escull primer una opció del desplegable.';
+        if(qs('rankingCentresMapa')) qs('rankingCentresMapa').innerHTML = 'Encara no hi ha cap valoració.';
+        actualitzarMarkersMapaOverride([], localStorage.getItem('centreMapaSeleccionatOrientacio')||'');
+        return;
+      }
+      const llista = Object.keys(centresOlot).map(function(id){
+        const centre = centresOlot[id];
+        const opcions = tipus==='batxillerat' ? centre.batxillerats : centre.cicles;
+        const score = opcions.indexOf(opcio)!==-1 ? 5 : 1;
+        return { id:id, centre:centre, score:score };
+      }).sort(function(a,b){ return b.score-a.score; });
+      if(qs('rankingCentresMapa')) qs('rankingCentresMapa').innerHTML = llista.map(function(item,index){ return '<div class="centre-rank '+(index===0?'top':'')+'"><strong>'+item.centre.nom+(index===0?' — recomanat':'')+'</strong><br>'+pintaEstrelles(item.score)+'</div>'; }).join('');
+      const millor = llista[0];
+      if(qs('resumMapa')) qs('resumMapa').innerHTML = '<strong>Tipus triat:</strong> '+(tipus==='batxillerat' ? 'batxillerat' : 'cicle')+'<br><strong>Opció triada:</strong> '+opcio+'<br><br><strong>Centre destacat:</strong> '+millor.centre.nom+'<br><strong>Nota orientativa:</strong> '+millor.score+'/5';
+      const destacats = llista.filter(function(x){ return x.score>=5; }).map(function(x){ return x.id; });
+      localStorage.setItem('centreRecomanatMapaOrientacio', millor.centre.nom);
+      localStorage.setItem('opcioMapaOrientacio', opcio);
+      localStorage.setItem('tipusMapaOrientacio', tipus);
+      actualitzarMarkersMapaOverride(destacats, millor.id);
+      mostrarCentreMapa(millor.id);
+    };
+
+    netejarMapa = function(){
+      if(qs('opcioMapa')) qs('opcioMapa').value='';
+      localStorage.removeItem('opcioMapaOrientacio');
+      localStorage.removeItem('centreRecomanatMapaOrientacio');
+      renderRankingMapa();
+    };
+
+    if(qs('tipusMapa')) qs('tipusMapa').value = localStorage.getItem('tipusMapaOrientacio') || 'batxillerat';
+    omplirDesplegableMapaOverride();
+    if(qs('opcioMapa') && localStorage.getItem('opcioMapaOrientacio')) qs('opcioMapa').value = localStorage.getItem('opcioMapaOrientacio');
+    if(qs('tipusMapa')) qs('tipusMapa').onchange = function(){ localStorage.setItem('tipusMapaOrientacio', qs('tipusMapa').value); omplirDesplegableMapaOverride(); renderRankingMapa(); };
+    if(qs('opcioMapa')) qs('opcioMapa').onchange = function(){ localStorage.setItem('opcioMapaOrientacio', qs('opcioMapa').value); renderRankingMapa(); };
+    if(qs('buscarMapa')) qs('buscarMapa').onclick = renderRankingMapa;
+    if(qs('netejarMapa')) qs('netejarMapa').onclick = netejarMapa;
+    setTimeout(function(){
+      crearMapaLeafletOverride();
+      setTimeout(function(){
+        if (typeof mapaLeafletOverride !== 'undefined' && mapaLeafletOverride) {
+          mapaLeafletOverride.invalidateSize(true);
+          mapaLeafletOverride.setView([42.1798, 2.4890], 14, { animate:false });
+        }
+      }, 150);
+      if(qs('rankingCentresMapa')) renderRankingMapa();
+      if(qs('infoCentreMapa')) mostrarCentreMapa(localStorage.getItem('centreMapaSeleccionatOrientacio')||'bosc');
+    },0);
+    window.addEventListener('resize', function(){
+      if (typeof mapaLeafletOverride !== 'undefined' && mapaLeafletOverride) {
+        mapaLeafletOverride.invalidateSize(true);
+      }
+    });
+  </script>
+<script>
+(function(){
+  if (typeof centresOlot !== 'undefined') {
+    centresOlot.bosc = {
+      nom:'Institut Bosc de la Coma',
+      adreca:'C/ Toledo, 12, Olot',
+      coords:[42.172493, 2.476742],
+      color:'#2563eb',
+      batxillerats:['Humanitats i Ciències Socials','Ciències i Tecnologia'],
+      cicles:['CFGM Gestió Administrativa','CFGM Sistemes Microinformàtics i Xarxes','CFGS Administració i Finances (DUAL)','CFGS Comerç Internacional (DUAL)','CFGS Transport i Logística (DUAL)','CFGS Administració de Sistemes Informàtics en Xarxa (DUAL)','CFGS Desenvolupament d’Aplicacions Multiplataforma (DUAL)','CFGS Desenvolupament d’Aplicacions Web (DUAL)'],
+      descripcio:'Centre amb batxillerat i cicles de gestió, comerç i informàtica.'
+    };
+    centresOlot.garrotxa = {
+      nom:'Institut La Garrotxa',
+      adreca:'Ctra. de Riudaura, 110, Olot',
+      coords:[42.1738, 2.4897],
+      color:'#16a34a',
+      batxillerats:['Ciències i Tecnologia','Humanitats i Ciències Socials'],
+      cicles:['CFGM Producció Agropecuària','CFGM Jardineria i Floristeria','CFGM Elaboració de Productes Alimentaris','CFGM Instal·lacions Elèctriques i Automàtiques','CFGM Manteniment Electromecànic','CFGM Mecanització','CFGM Confecció i Moda','CFGM Cures Auxiliars d’Infermeria','CFGM Construcció','CFGS Ramaderia i Assistència en Sanitat Animal','CFGS Fabricació Mecànica, Emmotllament i Disseny','CFGS Automatització i Robòtica Industrial','CFGS Mecatrònica Industrial','CFGS Patronatge i Moda','CFGS Laboratori Clínic i Biomèdic'],
+      descripcio:'Centre amb batxillerat i molts cicles tècnics, industrials, agraris, tèxtils i sanitaris.'
+    };
+    centresOlot.art = {
+      nom:'Escola d\'Art d\'Olot',
+      adreca:'Carrer Pare Antoni Soler, 1, Olot',
+      coords:[42.1835289, 2.4925672],
+      color:'#dc2626',
+      batxillerats:['Batxillerat d’Arts'],
+      cicles:['CFGM APGI','CFGM Revestiments Murals','CFGS Gràfica Publicitària','CFGS Decoració','CFGS Fotografia i Audiovisuals','CFGS Il·lustració','CFGS Producció de Personatge Escultòric'],
+      descripcio:'Centre orientat a arts, disseny, imatge i estudis creatius.'
+    };
+  }
+
+  function refrescaMapaCoords(){
+    if (typeof mapaLeafletOverride === 'undefined' || !mapaLeafletOverride || typeof L === 'undefined') return;
+    Object.keys(markersMapaOverride || {}).forEach(function(id){
+      try { mapaLeafletOverride.removeLayer(markersMapaOverride[id]); } catch(e) {}
+    });
+    markersMapaOverride = {};
+    Object.keys(centresOlot).forEach(function(id){
+      var centre = centresOlot[id];
+      var marker = L.circleMarker(centre.coords, {
+        radius: 10,
+        color: centre.color,
+        fillColor: centre.color,
+        fillOpacity: 0.9,
+        weight: 3
+      }).addTo(mapaLeafletOverride).bindPopup('<strong>'+centre.nom+'</strong><br>'+centre.adreca+'<br><em>'+centre.descripcio+'</em>');
+      marker.on('click', function(){ if (typeof mostrarCentreMapa === 'function') mostrarCentreMapa(id); });
+      markersMapaOverride[id] = marker;
+    });
+    mapaLeafletOverride.setView([42.1798, 2.4890], 14, {animate:false});
+    if (typeof renderRankingMapa === 'function') renderRankingMapa();
+    var centreGuardat = localStorage.getItem('centreMapaSeleccionatOrientacio') || 'bosc';
+    if (typeof mostrarCentreMapa === 'function') mostrarCentreMapa(centreGuardat);
+  }
+
+  setTimeout(refrescaMapaCoords, 250);
+  setTimeout(refrescaMapaCoords, 900);
+})();
+</script>
+<script>
+(function(){
+  const centresMapaExactes = {
+    bosc: {
+      nom: 'Institut Bosc de la Coma',
+      adreca: 'Carrer de Toledo 12, 17800 Olot, Girona, Spain',
+      batxillerats: ['Humanitats i Ciències Socials','Ciències i Tecnologia'],
+      cicles: ['CFGM Gestió Administrativa','CFGM Sistemes Microinformàtics i Xarxes','CFGS Administració i Finances (DUAL)','CFGS Comerç Internacional (DUAL)','CFGS Transport i Logística (DUAL)','CFGS Administració de Sistemes Informàtics en Xarxa (DUAL)','CFGS Desenvolupament d’Aplicacions Multiplataforma (DUAL)','CFGS Desenvolupament d’Aplicacions Web (DUAL)'],
+      descripcio: 'Centre amb batxillerat i cicles de gestió, comerç i informàtica.',
+      color: '#2563eb'
+    },
+    garrotxa: {
+      nom: 'Institut La Garrotxa',
+      adreca: 'Carretera de Riudaura 110, 17800 Olot, Girona, Spain',
+      batxillerats: ['Ciències i Tecnologia','Humanitats i Ciències Socials'],
+      cicles: ['CFGM Producció Agropecuària','CFGM Jardineria i Floristeria','CFGM Elaboració de Productes Alimentaris','CFGM Instal·lacions Elèctriques i Automàtiques','CFGM Manteniment Electromecànic','CFGM Mecanització','CFGM Confecció i Moda','CFGM Cures Auxiliars d’Infermeria','CFGM Construcció','CFGS Ramaderia i Assistència en Sanitat Animal','CFGS Fabricació Mecànica, Emmotllament i Disseny','CFGS Automatització i Robòtica Industrial','CFGS Mecatrònica Industrial','CFGS Patronatge i Moda','CFGS Laboratori Clínic i Biomèdic'],
+      descripcio: 'Centre amb batxillerat i molts cicles tècnics, industrials, agraris, tèxtils i sanitaris.',
+      color: '#16a34a'
+    },
+    art: {
+      nom: 'Escola d\'Art d\'Olot',
+      adreca: 'Carrer Pare Antoni Soler 1, 17800 Olot, Girona, Spain',
+      batxillerats: ['Batxillerat d’Arts'],
+      cicles: ['CFGM APGI','CFGM Revestiments Murals','CFGS Gràfica Publicitària','CFGS Decoració','CFGS Fotografia i Audiovisuals','CFGS Il·lustració','CFGS Producció de Personatge Escultòric'],
+      descripcio: 'Centre orientat a arts, disseny, imatge i estudis creatius.',
+      color: '#dc2626'
+    },
+    montsacopa: {
+      nom: 'Institut Montsacopa',
+      adreca: 'Avinguda de Joan de Cabirol s/n, 17800 Olot, Girona, Spain',
+      batxillerats: ['Batxillerat'],
+      cicles: ['Cicles Formatius'],
+      descripcio: 'Centre públic amb ESO, batxillerat i cicles formatius.',
+      color: '#7c3aed'
+    }
+  };
+
+  function popupText(centre){
+    return '<strong>'+centre.nom+'</strong><br>'+centre.adreca+'<br><em>'+centre.descripcio+'</em>';
+  }
+
+  async function geocodeAddress(addr){
+    const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' + encodeURIComponent(addr);
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if(!res.ok) throw new Error('No s\'ha pogut geocodificar ' + addr);
+    const data = await res.json();
+    if(!data || !data.length) throw new Error('Sense resultat per ' + addr);
+    return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+  }
+
+  function getLlistaCentre(centre, tipus){
+    return tipus === 'batxillerat' ? centre.batxillerats : centre.cicles;
+  }
+
+  function getTipusMapaExacte(){
+    return document.getElementById('tipusMapa') ? document.getElementById('tipusMapa').value : 'batxillerat';
+  }
+
+  function getOpcioMapaExacta(){
+    return document.getElementById('opcioMapa') ? document.getElementById('opcioMapa').value : '';
+  }
+
+  function rankCentreExacte(centre, tipus, opcio){
+    const llista = getLlistaCentre(centre, tipus);
+    if(!opcio) return 0;
+    return llista.includes(opcio) ? 5 : 1;
+  }
+
+  function stars(n){
+    return '<span class="stars">' + '★'.repeat(n) + '☆'.repeat(5-n) + '</span>';
+  }
+
+  function renderCentreInfoExacte(id){
+    const centre = centresMapaExactes[id];
+    if(!centre) return;
+    const tipus = getTipusMapaExacte();
+    const llista = getLlistaCentre(centre, tipus);
+    const titol = tipus === 'batxillerat' ? 'Batxillerats' : 'Cicles';
+    const box = document.getElementById('infoCentreMapa');
+    if(box){
+      box.innerHTML = '<strong>'+centre.nom+'</strong><p class="muted">'+centre.adreca+'</p><p>'+centre.descripcio+'</p><p><strong>'+titol+':</strong></p><div class="badges">'+llista.map(function(x){ return '<span class="badge">'+x+'</span>'; }).join('')+'</div>';
+    }
+    localStorage.setItem('centreMapaSeleccionatOrientacio', id);
+  }
+
+  function fillOptionsExacte(){
+    const sel = document.getElementById('opcioMapa');
+    if(!sel) return;
+    const tipus = getTipusMapaExacte();
+    const set = new Set();
+    Object.values(centresMapaExactes).forEach(function(c){ getLlistaCentre(c, tipus).forEach(function(x){ set.add(x); }); });
+    const items = Array.from(set).sort(function(a,b){ return a.localeCompare(b, 'ca'); });
+    sel.innerHTML = '<option value="">Tria una opció...</option>' + items.map(function(x){ return '<option value="'+x.replace(/"/g, '&quot;')+'">'+x+'</option>'; }).join('');
+    const saved = localStorage.getItem('opcioMapaOrientacio') || '';
+    if(items.includes(saved)) sel.value = saved;
+  }
+
+  async function rebuildExactMap(){
+    if(typeof L === 'undefined') return;
+    const mapNode = document.getElementById('mapaLeaflet');
+    if(!mapNode) return;
+
+    if(window.mapaLeafletOverride){
+      try { window.mapaLeafletOverride.remove(); } catch(e) {}
+    }
+    window.mapaLeafletOverride = L.map('mapaLeaflet').setView([42.1802, 2.4890], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(window.mapaLeafletOverride);
+
+    window.markersMapaOverride = {};
+
+    for (const [id, centre] of Object.entries(centresMapaExactes)) {
+      try {
+        const coords = await geocodeAddress(centre.adreca);
+        centre.coords = coords;
+        const marker = L.circleMarker(coords, {
+          radius: 10,
+          color: centre.color,
+          fillColor: centre.color,
+          fillOpacity: 0.92,
+          weight: 3
+        }).addTo(window.mapaLeafletOverride).bindPopup(popupText(centre));
+        marker.on('click', function(){ renderCentreInfoExacte(id); });
+        window.markersMapaOverride[id] = marker;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    setTimeout(function(){
+      window.mapaLeafletOverride.invalidateSize(true);
+    }, 150);
+  }
+
+  function renderRankingExacte(){
+    const tipus = getTipusMapaExacte();
+    const opcio = getOpcioMapaExacta();
+    const ranking = document.getElementById('rankingCentresMapa');
+    const resum = document.getElementById('resumMapa');
+    if(!ranking || !resum) return;
+    if(!opcio){
+      resum.innerHTML = 'Escull primer una opció del desplegable.';
+      ranking.innerHTML = 'Encara no hi ha cap valoració.';
+      return;
+    }
+    const llista = Object.entries(centresMapaExactes).map(function(entry){
+      return { id: entry[0], centre: entry[1], score: rankCentreExacte(entry[1], tipus, opcio) };
+    }).sort(function(a,b){ return b.score - a.score; });
+    ranking.innerHTML = llista.map(function(item, idx){
+      return '<div class="centre-rank '+(idx===0?'top':'')+'"><strong>'+item.centre.nom+(idx===0?' — recomanat':'')+'</strong><br>'+stars(item.score)+'</div>';
+    }).join('');
+    const millor = llista[0];
+    resum.innerHTML = '<strong>Tipus triat:</strong> '+(tipus==='batxillerat' ? 'batxillerat' : 'cicle')+'<br><strong>Opció triada:</strong> '+opcio+'<br><br><strong>Centre destacat:</strong> '+millor.centre.nom+'<br><strong>Nota orientativa:</strong> '+millor.score+'/5';
+    localStorage.setItem('centreRecomanatMapaOrientacio', millor.centre.nom);
+    renderCentreInfoExacte(millor.id);
+    Object.entries(window.markersMapaOverride || {}).forEach(function(entry){
+      const id = entry[0];
+      const marker = entry[1];
+      const centre = centresMapaExactes[id];
+      const score = rankCentreExacte(centre, tipus, opcio);
+      marker.setStyle({ radius: score===5 ? 14 : 10, color: score===5 ? '#111827' : centre.color, fillColor: centre.color, fillOpacity: 0.95, weight: score===5 ? 5 : 3 });
+    });
+  }
+
+  function connectMapaUI(){
+    const tipus = document.getElementById('tipusMapa');
+    const opcio = document.getElementById('opcioMapa');
+    const btnBuscar = document.getElementById('buscarMapa');
+    const btnNetejar = document.getElementById('netejarMapa');
+    if(tipus){
+      tipus.value = localStorage.getItem('tipusMapaOrientacio') || 'batxillerat';
+      tipus.onchange = function(){
+        localStorage.setItem('tipusMapaOrientacio', tipus.value);
+        fillOptionsExacte();
+        renderRankingExacte();
+      };
+    }
+    fillOptionsExacte();
+    if(opcio){
+      opcio.value = localStorage.getItem('opcioMapaOrientacio') || '';
+      opcio.onchange = function(){
+        localStorage.setItem('opcioMapaOrientacio', opcio.value);
+        renderRankingExacte();
+      };
+    }
+    if(btnBuscar) btnBuscar.onclick = function(){ renderRankingExacte(); };
+    if(btnNetejar) btnNetejar.onclick = function(){
+      if(opcio) opcio.value = '';
+      localStorage.removeItem('opcioMapaOrientacio');
+      renderRankingExacte();
+    };
+  }
+
+  window.addEventListener('load', function(){
+    connectMapaUI();
+    rebuildExactMap().then(function(){
+      renderRankingExacte();
+      const saved = localStorage.getItem('centreMapaSeleccionatOrientacio') || 'bosc';
+      renderCentreInfoExacte(saved);
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  const consultesGeocodificacio = {
+    bosc: 'Institut Bosc de la Coma, Carrer de Toledo 12, 17800 Olot, Girona, Catalunya, Espanya',
+    garrotxa: 'Institut La Garrotxa, Ctra. de Riudaura 110, 17800 Olot, Girona, Catalunya, Espanya',
+    art: 'Escola d\'Art d\'Olot, Carrer Pare Antoni Soler 1, 17800 Olot, Girona, Catalunya, Espanya',
+    montsacopa: 'Institut Montsacopa, Avinguda de Joan de Cabirol, 17800 Olot, Girona, Catalunya, Espanya'
+  };
+
+  async function geocodificaCentreExacte(query){
+    const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=es&bounded=1&viewbox=2.44,42.20,2.53,42.15&q=' + encodeURIComponent(query);
+    const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+    if(!res.ok) throw new Error('Error geocodificant: ' + query);
+    const data = await res.json();
+    if(!data || !data.length) throw new Error('Sense resultat geocodificant: ' + query);
+    return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+  }
+
+  async function reconstruirMapaAmbConsultesExactes(){
+    if(typeof L==='undefined' || !document.getElementById('mapaLeaflet')) return;
+    if(window.mapaLeafletOverride){
+      try { window.mapaLeafletOverride.remove(); } catch(e) {}
+    }
+    window.mapaLeafletOverride = L.map('mapaLeaflet').setView([42.1802, 2.4890], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(window.mapaLeafletOverride);
+
+    window.markersMapaOverride = {};
+
+    const ordre = ['bosc','garrotxa','art','montsacopa'];
+    for(const id of ordre){
+      const centre = centresOlot[id] || centresMapaExactes?.[id];
+      if(!centre) continue;
+      try {
+        const coords = await geocodificaCentreExacte(consultesGeocodificacio[id]);
+        centre.coords = coords;
+        const marker = L.circleMarker(coords, {
+          radius: 10,
+          color: centre.color || '#1d4ed8',
+          fillColor: centre.color || '#1d4ed8',
+          fillOpacity: 0.92,
+          weight: 3
+        }).addTo(window.mapaLeafletOverride).bindPopup('<strong>'+centre.nom+'</strong><br>'+centre.adreca+'<br><em>'+centre.descripcio+'</em>');
+        marker.on('click', function(){ if(typeof mostrarCentreMapa==='function') mostrarCentreMapa(id); });
+        window.markersMapaOverride[id] = marker;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    setTimeout(function(){
+      if(window.mapaLeafletOverride){
+        window.mapaLeafletOverride.invalidateSize(true);
+        window.mapaLeafletOverride.setView([42.1802, 2.4890], 14, { animate:false });
+      }
+      if(typeof renderRankingMapa==='function') renderRankingMapa();
+      if(typeof mostrarCentreMapa==='function') mostrarCentreMapa(localStorage.getItem('centreMapaSeleccionatOrientacio') || 'garrotxa');
+    }, 200);
+  }
+
+  window.addEventListener('load', function(){
+    setTimeout(reconstruirMapaAmbConsultesExactes, 250);
+  });
+})();
+</script>
+</body>
+</html>
