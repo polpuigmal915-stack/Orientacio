@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orientació Olot — després de l'ESO</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <style>
+    :root{
+      --bg:#05101f;
+      --bg2:#0f172a;
+      --panel:rgba(255,255,255,.88);
+      --panel-strong:rgba(255,255,255,.94);
+      --line:rgba(148,163,184,.22);
+      --text:#0f172a;
+      --muted:#5f6f88;
+      --blue:#2563eb;
+      --blue2:#60a5fa;
+      --violet:#7c3aed;
+      --pink:#ec4899;
+      --green:#16a34a;
+      --amber:#f59e0b;
+      --red:#dc2626;
+      --cyan:#0891b2;
+      --shadow:0 24px 60px rgba(2,8,23,.25);
+      --soft:0 12px 28px rgba(15,23,42,.12);
+      --radius-xl:30px;
+      --radius-lg:22px;
+      --radius-md:16px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:'Inter',Arial,sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(96,165,250,.18), transparent 18%),
+        radial-gradient(circle at 86% 16%, rgba(236,72,153,.14), transparent 16%),
+        radial-gradient(circle at 84% 84%, rgba(124,58,237,.18), transparent 20%),
+        linear-gradient(135deg, var(--bg), #0b1221 45%, #111827 100%);
+      overflow-x:hidden;
+    }
+
+    body::before,
+    body::after{
+      content:"";
+      position:fixed;
+      width:440px;
+      height:440px;
+      border-radius:999px;
+      filter:blur(75px);
+      opacity:.18;
+      z-index:0;
+      pointer-events:none;
+    }
+    body::before{
+      left:-150px;
+      top:120px;
+      background:#60a5fa;
+      animation:blob1 16s ease-in-out infinite;
+    }
+    body::after{
+      right:-140px;
+      bottom:40px;
+      background:#a855f7;
+      animation:blob2 18s ease-in-out infinite;
+    }
+    @keyframes blob1{
+      0%,100%{transform:translateY(0) scale(1)}
+      50%{transform:translateY(-24px) scale(1.06)}
+    }
+    @keyframes blob2{
+      0%,100%{transform:translateY(0) scale(1)}
+      50%{transform:translateY(24px) scale(1.08)}
+    }
+
+    header{
+      position:relative;
+      z-index:2;
+      padding:42px 18px 28px;
+      text-align:center;
+      color:white;
+      overflow:hidden;
+      background:
+        linear-gradient(135deg, rgba(37,99,235,.96), rgba(124,58,237,.88) 54%, rgba(236,72,153,.72));
+      border-bottom:1px solid rgba(255,255,255,.14);
+      box-shadow:0 18px 50px rgba(15,23,42,.25);
+    }
+    header::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent),
+        radial-gradient(circle at 20% 24%, rgba(255,255,255,.10), transparent 18%),
+        radial-gradient(circle at 78% 28%, rgba(255,255,255,.10), transparent 16%);
+      animation:shine 10s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes shine{
+      0%{transform:translateX(-18%)}
+      100%{transform:translateX(18%)}
+    }
+    header h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem,4vw,3.7rem);
+      letter-spacing:-.045em;
+      position:relative;
+      z-index:1;
+      text-shadow:0 8px 22px rgba(0,0,0,.18);
+    }
+    header p{
+      margin:0 auto;
+      max-width:1160px;
+      line-height:1.65;
+      opacity:.98;
+      position:relative;
+      z-index:1;
+      font-size:1.02rem;
+    }
+
+    nav{
+      position:sticky;
+      top:0;
+      z-index:50;
+      width:min(1550px, calc(100% - 24px));
+      margin:18px auto 0;
+      padding:14px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+      border-radius:999px;
+      backdrop-filter:blur(18px);
+      background:rgba(255,255,255,.09);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow:var(--soft);
+    }
+    nav button{
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:12px 18px;
+      font-weight:800;
+      font-size:.96rem;
+      background:linear-gradient(180deg, rgba(255,255,255,.84), rgba(226,232,240,.95));
+      color:#1d4ed8;
+      box-shadow:0 10px 20px rgba(15,23,42,.08);
+      transition:transform .22s ease, box-shadow .22s ease, filter .22s ease;
+    }
+    nav button:hover{
+      transform:translateY(-2px);
+      box-shadow:0 18px 26px rgba(15,23,42,.12);
+    }
+    nav button.active{
+      background:linear-gradient(135deg, var(--blue), var(--violet));
+      color:#fff;
+      box-shadow:0 16px 32px rgba(37,99,235,.32);
+    }
+
+    .page{
+      display:none;
+      max-width:1550px;
+      margin:0 auto;
+      padding:28px 18px 48px;
+      position:relative;
+      z-index:1;
+      animation:pageIn .32s ease;
+    }
+    .page.active{display:block}
+    @keyframes pageIn{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:none}
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:430px minmax(0,1fr);
+      gap:22px;
+      align-items:start;
+    }
+    .layout-2{
+      display:grid;
+      grid-template-columns:340px minmax(0,1fr);
+      gap:20px;
+      align-items:start;
+    }
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+    }
+    .grid-auto{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:14px;
+    }
+
+    .card{
+      position:relative;
+      overflow:hidden;
+      margin-bottom:18px;
+      padding:24px;
+      border-radius:var(--radius-xl);
+      background:var(--panel);
+      backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,.34);
+      box-shadow:var(--shadow);
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,.18), transparent 42%, rgba(96,165,250,.05));
+      pointer-events:none;
+    }
+    .card > *{position:relative;z-index:1}
+    .card h2,.card h3,.card h4{margin-top:0;letter-spacing:-.03em}
+    .muted{color:var(--muted);line-height:1.55}
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .section-title .dot{
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      box-shadow:0 0 0 6px rgba(37,99,235,.14);
+      flex:0 0 auto;
+    }
+
+    .chat-box,.scroll-box{
+      background:rgba(248,250,252,.86);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px;
+      max-height:360px;
+      overflow:auto;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+    }
+    .msg{
+      padding:12px 14px;
+      border-radius:18px;
+      margin-bottom:10px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      box-shadow:0 8px 20px rgba(15,23,42,.06);
+      animation:msgIn .24s ease;
+    }
+    .msg.user{
+      background:linear-gradient(135deg,#dbeafe,#eff6ff);
+      border-bottom-left-radius:8px;
+    }
+    .msg.ai{
+      background:linear-gradient(135deg,#eef2ff,#ffffff);
+      border-bottom-right-radius:8px;
+    }
+    @keyframes msgIn{
+      from{opacity:0;transform:translateY(8px)}
+      to{opacity:1;transform:none}
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .row > *{flex:1}
+
+    textarea,input,select{
+      width:100%;
+      padding:13px 14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.96);
+      font-size:1rem;
+      margin:6px 0 12px;
+      box-shadow:inset 0 1px 2px rgba(15,23,42,.05);
+      transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+    input:focus, textarea:focus, select:focus{
+      outline:none;
+      border-color:rgba(37,99,235,.42);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+      transform:translateY(-1px);
+    }
+
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+      color:#fff;
+      background:linear-gradient(135deg, var(--blue), var(--violet));
+      box-shadow:0 14px 28px rgba(37,99,235,.28);
+      transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 18px 32px rgba(37,99,235,.34);
+    }
+    .btn.secondary{
+      background:linear-gradient(135deg,#e0ecff,#eef2ff);
+      color:#1d4ed8;
+      box-shadow:0 12px 24px rgba(37,99,235,.10);
+    }
+    .btn.ghost{
+      background:linear-gradient(135deg,#f8fafc,#e2e8f0);
+      color:#334155;
+      box-shadow:0 10px 22px rgba(15,23,42,.08);
+    }
+    .btn.success{background:linear-gradient(135deg,#22c55e,#15803d)}
+    .btn.danger{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+
+    .pill,.badge,.chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:9px 12px;
+      background:linear-gradient(135deg,#dbeafe,#eff6ff);
+      color:#1e40af;
+      border:1px solid rgba(96,165,250,.22);
+      box-shadow:0 8px 16px rgba(37,99,235,.08);
+      font-size:.94rem;
+      margin:4px 6px 0 0;
+    }
+    .badge-click{
+      border:none;
+      cursor:pointer;
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .badge-click:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 22px rgba(37,99,235,.14);
+    }
+
+    .info-box{
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px;
+      background:linear-gradient(180deg,#fff,#f8fafc);
+      box-shadow:0 10px 22px rgba(15,23,42,.06);
+    }
+    .info-box strong{
+      display:block;
+      margin-bottom:8px;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+      font-size:.9rem;
+      color:#334155;
+    }
+
+    .teacher{
+      border-left:6px solid var(--amber);
+      background:linear-gradient(180deg,#fff8df,#fffbeb);
+    }
+
+    .student-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:620px;
+      overflow:auto;
+    }
+    .student-btn{
+      padding:13px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,#f8fafc);
+      cursor:pointer;
+      text-align:left;
+      font-weight:700;
+      box-shadow:0 10px 20px rgba(15,23,42,.06);
+      transition:.2s;
+    }
+    .student-btn:hover{transform:translateY(-2px)}
+    .student-btn.active{
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      color:#fff;
+      border-color:transparent;
+    }
+
+    .svg-wrap{
+      overflow-x:auto;
+      padding:10px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.6), rgba(241,245,249,.35));
+      border:1px solid rgba(255,255,255,.35);
+    }
+    .svg-node{
+      width:100%;
+      height:100%;
+      border:2px solid rgba(148,163,184,.32);
+      background:linear-gradient(180deg,#fff,#f8fafc);
+      border-radius:18px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s;
+      box-shadow:0 10px 18px rgba(15,23,42,.08);
+    }
+    .svg-node span{
+      display:block;
+      font-size:13px;
+      color:#475569;
+      font-weight:600;
+    }
+    .svg-node:hover{transform:translateY(-3px) scale(1.02)}
+    .svg-node.active{
+      background:linear-gradient(135deg,var(--blue),var(--violet));
+      color:#fff;
+      border-color:transparent;
+    }
+    .svg-node.active span{color:rgba(255,255,255,.9)}
+    .path-line{
+      stroke:#94a3b8;
+      stroke-width:3.2;
+      marker-end:url(#arrowhead);
+      transition:.25s ease;
+    }
+    .path-line.green{stroke:#16a34a;stroke-width:5}
+    .path-line.blue{stroke:#2563eb;stroke-width:5}
+    .path-line.red{stroke:#dc2626;stroke-width:5}
+
+    .map-wrap{
+      display:grid;
+      grid-template-columns:1.12fr .88fr;
+      gap:20px;
+    }
+    .map-box{
+      border:1px solid var(--line);
+      border-radius:24px;
+      overflow:hidden;
+      background:rgba(255,255,255,.86);
+      box-shadow:0 16px 34px rgba(15,23,42,.14);
+    }
+    #mapaLeaflet{
+      width:100%;
+      height:560px;
+    }
+
+    .rank-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      margin-bottom:10px;
+      background:#fff;
+      box-shadow:0 10px 20px rgba(15,23,42,.05);
+    }
+    .rank-card.top{
+      border-color:#f59e0b;
+      box-shadow:0 0 0 3px rgba(245,158,11,.14), 0 12px 24px rgba(245,158,11,.10);
+    }
+    .stars{
+      color:#f59e0b;
+      letter-spacing:2px;
+      font-size:1.1rem;
+    }
+    .hero-note{
+      border-left:6px solid #f59e0b;
+      background:linear-gradient(180deg,#fff8df,#fffbeb);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 10px 22px rgba(245,158,11,.10);
+    }
+
+    .tutorial-step{
+      padding:14px;
+      border-radius:18px;
+      border:1px dashed rgba(148,163,184,.26);
+      background:rgba(255,255,255,.56);
+    }
+
+    .timeline{display:grid;gap:12px}
+    .timeline-item{
+      position:relative;
+      padding:14px 16px 14px 22px;
+      border-left:4px solid var(--blue);
+      border-radius:0 16px 16px 0;
+      background:#fff;
+      box-shadow:0 10px 20px rgba(15,23,42,.05);
+    }
+
+    .cutoff-auto{
+      color:#1d4ed8;
+      font-weight:700;
+      margin-top:-4px;
+      margin-bottom:10px;
+      font-size:.92rem;
+    }
+
+    .leaflet-popup-content{line-height:1.55}
+    .leaflet-container{font-family:'Inter',Arial,sans-serif}
+
+    @media (max-width:1100px){
+      .layout,.layout-2,.map-wrap,.grid-2{grid-template-columns:1fr}
+      .grid-3{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Orientació Olot · després de l'ESO</h1>
+    <p>
+      Web interactiva per orientar després de l'ESO: batxillerat, cicles, PTT / PFI, feina, universitat,
+      mapa real d'Olot, comparador, simulador, planner.
+    </p>
+  </header>
+
+  <nav id="mainNav">
+    <button class="active" data-page="itineraris">Itineraris</button>
+    <button data-page="classe">Noms</button>
+    <button data-page="pissarra">Pissarra</button>
+    <button data-page="recorreguts">Recorreguts guardats</button>
+    <button data-page="mapa">Mapa</button>
+    <button data-page="comparador">Comparador</button>
+    <button data-page="simulador">Simulador</button>
+    <button data-page="planner">Planner</button>
+  </nav>
+
+  <!-- ITINERARIS -->
+  <section id="itineraris" class="page active">
+    <div class="layout">
+      <aside>
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h3>Orientador AI intern</h3></div>
+          <p class="muted">Explica gustos, matèries que t'agraden o quin tipus de camí prefereixes. Et proposa 3 recorreguts de colors i els pots guardar.</p>
+          <div id="chatOrientador" class="chat-box"></div>
+          <textarea id="inputOrientador" placeholder="Ex: m'agrada informàtica, vull alguna cosa pràctica i després potser seguir estudiant..."></textarea>
+          <div class="row">
+            <button class="btn" id="btnEnviarOrientador">Generar 3 opcions</button>
+            <button class="btn secondary" id="btnResetOrientador">Nou camí</button>
+          </div>
+        </div>
+
+        <div class="card teacher">
+          <div class="section-title"><span class="dot"></span><h3>Resum per explicar a classe</h3></div>
+          <div id="resumProfe" class="muted">Encara no hi ha cap recorregut seleccionat.</div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h3>Opcions generades</h3></div>
+          <div id="opcionsGenerades" class="grid-3"></div>
+          <input id="nomRecorregut" type="text" placeholder="Nom del recorregut per guardar" />
+          <button class="btn success" id="btnGuardarRecorregut">Guardar recorregut</button>
+        </div>
+      </aside>
+
+      <main>
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h2>Esquema visual després de l'ESO</h2></div>
+          <p class="muted">Clica les caixes per veure la informació. Quan l'orientador intern recomana un recorregut, les línies del camí es pinten de color.</p>
+
+          <div class="svg-wrap">
+            <svg viewBox="0 0 1220 820" width="100%" aria-label="Esquema després de l'ESO">
+              <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                  <polygon points="0 0, 8 4, 0 8" fill="currentColor"></polygon>
+                </marker>
+              </defs>
+
+              <line id="line-eso-treball" class="path-line" x1="610" y1="95" x2="180" y2="210"></line>
+              <line id="line-eso-ptt" class="path-line" x1="610" y1="95" x2="400" y2="210"></line>
+              <line id="line-eso-cicles" class="path-line" x1="610" y1="95" x2="610" y2="210"></line>
+              <line id="line-eso-batx" class="path-line" x1="610" y1="95" x2="980" y2="210"></line>
+
+              <line id="line-cicles-cfgm" class="path-line" x1="610" y1="290" x2="500" y2="420"></line>
+              <line id="line-cicles-cfgs" class="path-line" x1="610" y1="290" x2="700" y2="420"></line>
+              <line id="line-cfgm-sortides" class="path-line" x1="500" y1="490" x2="500" y2="635"></line>
+              <line id="line-cfgs-sortides" class="path-line" x1="700" y1="490" x2="700" y2="635"></line>
+
+              <line id="line-batx-select" class="path-line" x1="980" y1="290" x2="980" y2="420"></line>
+              <line id="line-select-grau" class="path-line" x1="980" y1="490" x2="980" y2="635"></line>
+              <line id="line-cfgm-select" class="path-line" x1="500" y1="490" x2="860" y2="420"></line>
+
+              <foreignObject x="525" y="30" width="170" height="70">
+                <button class="svg-node" data-route="eso" type="button">ESO<span>4 anys</span></button>
+              </foreignObject>
+
+              <foreignObject x="95" y="190" width="180" height="80">
+                <button class="svg-node" data-route="treball" type="button">Treballar<span>Sou inicial orientatiu: 1100 € a 1300 €</span></button>
+              </foreignObject>
+
+              <foreignObject x="310" y="190" width="180" height="80">
+                <button class="svg-node" data-route="ptt" type="button">PTT / PFI<span>1 any</span></button>
+              </foreignObject>
+
+              <foreignObject x="520" y="190" width="190" height="84">
+                <button class="svg-node" data-route="cicles" type="button">Cicles d'Olot<span>CFGM i CFGS</span></button>
+              </foreignObject>
+
+              <foreignObject x="900" y="190" width="180" height="84">
+                <button class="svg-node" data-route="batxillerat" type="button">Batxillerat<span>2 anys</span></button>
+              </foreignObject>
+
+              <foreignObject x="420" y="420" width="160" height="76">
+                <button class="svg-node" data-route="cfgm" type="button">CFGM<span>2 anys</span></button>
+              </foreignObject>
+
+              <foreignObject x="620" y="420" width="160" height="76">
+                <button class="svg-node" data-route="cfgs" type="button">CFGS<span>2 anys</span></button>
+              </foreignObject>
+
+              <foreignObject x="900" y="420" width="160" height="76">
+                <button class="svg-node" data-route="selectivitat" type="button">Selectivitat<span>Proves PAU</span></button>
+              </foreignObject>
+
+              <foreignObject x="420" y="635" width="180" height="70">
+                <button class="svg-node" data-route="sortides_cfgm" type="button">Sortides CFGM<span>Feines + accés CFGS</span></button>
+              </foreignObject>
+
+              <foreignObject x="620" y="635" width="180" height="70">
+                <button class="svg-node" data-route="sortides_cfgs" type="button">Sortides CFGS<span>Feines + grau</span></button>
+              </foreignObject>
+
+              <foreignObject x="890" y="635" width="200" height="70">
+                <button class="svg-node" data-route="universitat" type="button">Universitat / Grau<span>3 a 5 anys</span></button>
+              </foreignObject>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h2 id="infoTitle">Informació</h2></div>
+          <p id="infoDesc" class="muted">Clica una part de l'esquema per veure la informació detallada.</p>
+
+          <div class="grid-auto" id="infoMetrics"></div>
+
+          <div class="grid-2" style="margin-top:14px;">
+            <div class="info-box">
+              <strong>Opcions</strong>
+              <div id="infoOptions" class="muted">Encara no hi ha opcions seleccionades.</div>
+            </div>
+            <div class="info-box">
+              <strong>Assignatures / contingut</strong>
+              <div id="infoSubjects" class="muted">Encara no hi ha contingut seleccionat.</div>
+            </div>
+          </div>
+
+          <div class="card teacher" style="margin-top:16px;">
+            <div class="section-title"><span class="dot"></span><h3>Subtria detallada</h3></div>
+            <div id="subTria" class="muted">Quan cliquis Batxillerat o Cicles, aquí podràs triar l'opció concreta.</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- NOMS -->
+  <section id="classe" class="page">
+    <div class="layout-2">
+      <aside>
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h3>Alumnes de la classe</h3></div>
+          <p class="muted">Pol va primer i Toni va segon tal com havies demanat. Els canvis queden guardats al navegador.</p>
+          <div id="studentList" class="student-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h3>AI per orientar l'alumne</h3></div>
+          <div id="chatAlumne" class="chat-box"></div>
+          <textarea id="inputAlumne" placeholder="Ex: li agrada dibuixar, és creatiu, no vol massa teoria..."></textarea>
+          <div class="row">
+            <button class="btn" id="btnAnalitzaAlumne">Analitzar</button>
+            <button class="btn secondary" id="btnNetejaChatAlumne">Netejar</button>
+          </div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h2 id="studentTitle">Fitxa de l'alumne</h2></div>
+          <div class="grid-2">
+            <div>
+              <label for="studentPath">Itinerari preferit</label>
+              <select id="studentPath">
+                <option value="batxillerat">Batxillerat</option>
+                <option value="cicles">Cicles</option>
+                <option value="ptt">PTT / PFI</option>
+                <option value="treball">Treballar</option>
+              </select>
+            </div>
+            <div>
+              <label for="studentOption">Cicle / modalitat</label>
+              <input id="studentOption" type="text" placeholder="Ex: DAW, SMX, Batxillerat d'Arts, Ciències i Tecnologia..." />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label for="studentGrade">Nota de tall de l’any passat</label>
+              <input id="studentGrade" type="text" readonly placeholder="Es posa automàticament segons el que escriguis" />
+              <div id="studentCutoffHint" class="cutoff-auto">Es calcula automàticament segons el cicle o batxillerat.</div>
+            </div>
+            <div>
+              <label for="studentObs">Observacions</label>
+              <textarea id="studentObs" placeholder="Observacions de l'alumne..."></textarea>
+            </div>
+          </div>
+
+          <div class="grid-auto" id="miniStudentSummary"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h3>Estadístiques de classe</h3></div>
+          <div id="classStats" class="grid-auto"></div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- PISSARRA -->
+  <section id="pissarra" class="page">
+    <div class="layout">
+      <aside>
+        <div class="card teacher">
+          <div class="section-title"><span class="dot"></span><h3>Joc dinàmic per conèixer-te</h3></div>
+          <div class="tutorial-step">
+            <strong>Pregunta actual:</strong>
+            <div id="gameQuestion" style="margin-top:8px;font-weight:700"></div>
+          </div>
+          <textarea id="gameAnswer" placeholder="Escriu la teva resposta..."></textarea>
+          <div class="row">
+            <button class="btn" id="btnAddGameAnswer">Guardar resposta</button>
+            <button class="btn secondary" id="btnNewQuestion">Nova pregunta</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h3>Idees de pissarra</h3></div>
+          <div class="timeline">
+            <div class="timeline-item">Votació ràpida de camins preferits de la classe.</div>
+            <div class="timeline-item">Roda de gustos: creatiu, pràctic, tecnològic, social.</div>
+            <div class="timeline-item">Mini reptes per encertar quin centre encaixa amb cada perfil.</div>
+          </div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="card">
+          <div class="section-title"><span class="dot"></span><h2>Pissarra interactiva</h2></div>
+          <div id="boardItems" class="scroll-box" style="max-height:520px"></div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn danger" id="btnClearBoard">Buidar pissarra</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- RECORREGUTS -->
+  <section id="recorreguts" class="page">
+    <div class="card">
+      <div class="section-title"><span class="dot"></span><h2>Recorreguts guardats</h2></div>
+      <div id="savedRoutes"></div>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <section id="mapa" class="page">
+    <div class="card">
+      <div class="section-title"><span class="dot"></span><h2>Mapa d'Olot</h2></div>
+      <p class="muted">
+        Primer tries si busques <strong>batxillerat</strong> o <strong>cicles</strong>. Després tries exactament l'opció
+        en un desplegable. El mapa recomana el centre i marca les puntuacions correctament.
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <label for="mapType">Quin tipus d'estudi busques?</label>
+          <select id="mapType">
+            <option value="batxillerat">Batxillerat</option>
+            <option value="cicles">Cicles</option>
+          </select>
+        </div>
+        <div>
+          <label for="mapOption">Quina opció vols fer?</label>
+          <select id="mapOption"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="btnMapSearch">Buscar al mapa</button>
+        <button class="btn secondary" id="btnMapReset">Netejar</button>
+      </div>
+
+      <div id="mapSummary" class="hero-note" style="margin-top:12px">Escull el tipus i l'opció del desplegable.</div>
+
+      <div class="map-wrap" style="margin-top:18px">
+        <div class="map-box">
+          <div id="mapaLeaflet"></div>
+        </div>
+        <div>
+          <div class="card" style="background:var(--panel-strong)">
+            <div class="section-title"><span class="dot"></span><h3>Informació del centre</h3></div>
+            <div id="mapCenterInfo" class="muted">Clica un marcador o fes una cerca.</div>
+          </div>
+          <div class="card" style="background:var(--panel-strong)">
+            <div class="section-title"><span class="dot"></span><h3>Rànquing</h3></div>
+            <div id="mapRanking"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARADOR -->
+  <section id="comparador" class="page">
+    <div class="card">
+      <div class="section-title"><span class="dot"></span><h2>Comparador de camins</h2></div>
+      <p class="muted">Compara dues opcions i mira durada, tipus d'aprenentatge, continuïtat i sou orientatiu futur.</p>
+
+      <div class="grid-2">
+        <div>
+          <label for="compareA">Opció A</label>
+          <select id="compareA"></select>
+        </div>
+        <div>
+          <label for="compareB">Opció B</label>
+          <select id="compareB"></select>
+        </div>
+      </div>
+
+      <button class="btn" id="btnCompare">Comparar</button>
+
+      <div id="compareResult" class="grid-2" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- SIMULADOR -->
+  <section id="simulador" class="page">
+    <div class="card">
+      <div class="section-title"><span class="dot"></span><h2>Simulador de decisió</h2></div>
+      <p class="muted">Mou els pesos segons allò que valores més. El simulador et recomana el tipus de camí més coherent.</p>
+
+      <div class="grid-2">
+        <div class="info-box">
+          <strong>Pràctic</strong>
+          <input id="simPractic" type="range" min="0" max="10" value="7" />
+          <div id="simPracticVal">7/10</div>
+        </div>
+        <div class="info-box">
+          <strong>Creatiu</strong>
+          <input id="simCreatiu" type="range" min="0" max="10" value="5" />
+          <div id="simCreatiuVal">5/10</div>
+        </div>
+        <div class="info-box">
+          <strong>Tecnològic</strong>
+          <input id="simTec" type="range" min="0" max="10" value="6" />
+          <div id="simTecVal">6/10</div>
+        </div>
+        <div class="info-box">
+          <strong>Vols continuar estudiant</strong>
+          <input id="simEstudi" type="range" min="0" max="10" value="6" />
+          <div id="simEstudiVal">6/10</div>
+        </div>
+      </div>
+
+      <button class="btn" id="btnSimulate">Calcular recomanació</button>
+      <div id="simResult" class="hero-note" style="margin-top:14px">Encara no s'ha calculat cap recomanació.</div>
+    </div>
+  </section>
+
+  <!-- PLANNER -->
+  <section id="planner" class="page">
+    <div class="card">
+      <div class="section-title"><span class="dot"></span><h2>Planner d'orientació</h2></div>
+      <p class="muted">Organitza passos reals: portes obertes, mirar centres, parlar amb família, decidir, preinscripció.</p>
+
+      <div class="row">
+        <input id="plannerInput" type="text" placeholder="Ex: Mirar portes obertes del Bosc de la Coma" />
+        <button class="btn" id="btnAddPlanner">Afegir pas</button>
+      </div>
+
+      <div class="timeline" id="plannerList"></div>
+    </div>
+  </section>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    const qs = (id) => document.getElementById(id);
+    const qsa = (sel) => document.querySelectorAll(sel);
+
+    // =========================
+    // DADES
+    // =========================
+    const students = [
+      'Pol','Toni','Arnau','Abril','Aura','Bruna','Carla','Daniel','Edgar','Ènia','Helena','Josep C.',
+      'Jana','Josep S.','Joel','Laia C.','Laia P.','Martí','Mireia','Nikola','Nora','Roger','Sara',
+      'Aina','Ada','Ibra','Isabela','Mical','Ona','Sirat','Fatu','Bintou'
+    ];
+
+    const centres = {
+      bosc: {
+        nom: 'Institut Bosc de la Coma',
+        adreca: 'C/ Toledo, 12 - 17800 Olot',
+        coords: [42.173333, 2.476111],
+        color: '#2563eb',
+        batxillerats: ['Humanitats i Ciències Socials', 'Ciències i Tecnologia'],
+        cicles: [
+          'CFGM Gestió Administrativa',
+          'CFGM Sistemes Microinformàtics i Xarxes',
+          'CFGS Administració i Finances (DUAL)',
+          'CFGS Comerç Internacional (DUAL)',
+          'CFGS Transport i Logística (DUAL)',
+          'CFGS Administració de Sistemes Informàtics en Xarxa (DUAL)',
+          'CFGS Desenvolupament d’Aplicacions Multiplataforma (DUAL)',
+          'CFGS Desenvolupament d’Aplicacions Web (DUAL)'
+        ],
+        desc: 'Centre amb batxillerat i cicles de gestió, comerç i informàtica.'
+      },
+      garrotxa: {
+        nom: 'Institut La Garrotxa',
+        adreca: 'Ctra. de Riudaura, 110 - 17800 Olot',
+        coords: [42.183056, 2.468056],
+        color: '#16a34a',
+        batxillerats: ['Ciències i Tecnologia', 'Humanitats i Ciències Socials'],
+        cicles: [
+          'CFGM Producció Agropecuària',
+          'CFGM Jardineria i Floristeria',
+          'CFGM Elaboració de Productes Alimentaris',
+          'CFGM Instal·lacions Elèctriques i Automàtiques',
+          'CFGM Manteniment Electromecànic',
+          'CFGM Mecanització',
+          'CFGM Confecció i Moda',
+          'CFGM Cures Auxiliars d’Infermeria',
+          'CFGM Construcció',
+          'CFGS Ramaderia i Assistència en Sanitat Animal',
+          'CFGS Fabricació Mecànica, Emmotllament i Disseny',
+          'CFGS Automatització i Robòtica Industrial',
+          'CFGS Mecatrònica Industrial',
+          'CFGS Patronatge i Moda',
+          'CFGS Laboratori Clínic i Biomèdic'
+        ],
+        desc: 'Centre amb batxillerat i molts cicles tècnics, industrials, agraris, tèxtils i sanitaris.'
+      },
+      art: {
+        nom: "Escola d'Art d'Olot",
+        adreca: 'C/ Pare Antoni Soler, 1 - 17800 Olot',
+        coords: [42.180950, 2.489950],
+        color: '#dc2626',
+        batxillerats: ['Batxillerat d’Arts'],
+        cicles: [
+          'CFGM APGI',
+          'CFGM Revestiments Murals',
+          'CFGS Gràfica Publicitària',
+          'CFGS Decoració',
+          'CFGS Fotografia i Audiovisuals',
+          'CFGS Il·lustració',
+          'CFGS Producció de Personatge Escultòric'
+        ],
+        desc: 'Centre orientat a arts, disseny, imatge i estudis creatius.'
+      },
+      montsacopa: {
+        nom: 'Institut Montsacopa',
+        adreca: 'Av. Joan de Cabirol, s/n - 17800 Olot',
+        coords: [42.184700, 2.486900],
+        color: '#7c3aed',
+        batxillerats: ['Batxillerat'],
+        cicles: ['Cicles Formatius'],
+        desc: 'Centre públic d’ESO, batxillerat i cicles.'
+      }
+    };
+
+    const routeData = {
+      eso: {
+        title: 'ESO',
+        desc: 'Etapa obligatòria abans de triar el camí següent.',
+        metrics: [
+          ['Durada', '4 anys'],
+          ['Quines opcions tens després', 'Batxillerat, cicles, PTT / PFI o treballar'],
+          ['Possibles salaris en el futur', 'Amb només l’ESO no hi ha un sou fix. Si entres directament a feines bàsiques, el sou inicial immediat acostuma a ser més baix i molt variable segons empresa, horari i sector. Sovint es mou en feines d’entrada, ajudant, reposició, logística, magatzem o suport bàsic.'],
+          ['Nota mínima aprox. (últim any)', '-']
+        ],
+        options: ['Educació obligatòria', 'Base per seguir estudiant'],
+        subjects: ['Matèries generals comunes', 'Orientació personal i acadèmica']
+      },
+      treball: {
+        title: 'Treballar',
+        desc: 'Opció directa al món laboral després de l’ESO.',
+        metrics: [
+          ['Durada', 'Entrada directa'],
+          ['Quines opcions tens després', 'Feina o formació més endavant'],
+          ['Possibles salaris en el futur', 'Si comences a treballar just després de l’ESO, l’empresa normalment et pagaria un sou inicial d’entrada bastant bàsic. Com a orientació general, podria estar aproximadament entre 1.100 € i 1.300 € bruts al mes en feines poc qualificades, tot i que pot variar molt segons conveni, jornada, torns i tipus de contracte.'],
+          ['Nota mínima aprox. (últim any)', '-']
+        ],
+        options: ['Entrar a treballar', 'Potser combinar feina i estudis'],
+        subjects: ['No hi ha assignatures perquè no és un estudi']
+      },
+      ptt: {
+        title: 'PTT / PFI',
+        desc: 'Via de transició pràctica per preparar-te millor abans d’un altre pas formatiu o laboral.',
+        metrics: [
+          ['Durada', '1 any'],
+          ['Quines opcions tens després', 'CFGM, feina o altres vies formatives'],
+          ['Possibles salaris en el futur', 'El PTT / PFI no sol portar directament a un sou alt, però et pot ajudar a accedir millor a feines inicials o a un CFGM. Si després entres a treballar en una feina bàsica relacionada, el sou immediat podria ser semblant al d’entrada al mercat laboral: aproximadament entre 1.100 € i 1.300 € bruts al mes.'],
+          ['Nota mínima aprox. (últim any)', '-']
+        ],
+        options: ['PTT / PFI', 'Preparació pràctica i orientadora'],
+        subjects: ['Mòduls pràctics', 'Competències bàsiques', 'Orientació laboral']
+      },
+      batxillerat: {
+        title: 'Batxillerat',
+        desc: 'Via acadèmica de 2 anys. Després normalment va la selectivitat o altres accessos.',
+        metrics: [
+          ['Durada', '2 anys'],
+          ['Quines opcions tens després', 'Selectivitat, grau universitari, CFGS'],
+          ['Possibles salaris en el futur', 'El batxillerat per si sol no està pensat com a sortida laboral directa especialitzada. Si acabes batxillerat i entres immediatament a treballar sense estudis posteriors, el sou inicial acostuma a ser semblant al d’una feina d’entrada general, sovint aproximadament entre 1.100 € i 1.350 € bruts al mes. El valor real del batxillerat és sobretot que t’obre la porta a graus universitaris o altres estudis superiors.'],
+          ['Nota mínima aprox. (últim any)', 'A partir de 5']
+        ],
+        options: ['Ciències i Tecnologia', 'Humanitats i Ciències Socials', 'Arts'],
+        subjects: ['Tria una modalitat a sota']
+      },
+      cicles: {
+        title: 'Cicles d’Olot',
+        desc: 'Opció professionalitzadora. Pots fer CFGM i després seguir a CFGS o treballar.',
+        metrics: [
+          ['Durada', '2 anys cada cicle'],
+          ['Quines opcions tens després', 'Feina, CFGS o universitat segons el cas'],
+          ['Possibles salaris en el futur', 'Els cicles acostumen a donar una entrada laboral més directa. En acabar, el sou immediat depèn molt de la família professional: administració, informàtica, indústria, sanitat, logística, moda, art o manteniment. En general, un CFGM sol començar amb sous inicials més bàsics i un CFGS acostuma a permetre una entrada una mica millor.'],
+          ['Nota mínima aprox. (últim any)', 'Depèn del cicle']
+        ],
+        options: ['CFGM', 'CFGS', 'Centres d’Olot'],
+        subjects: ['Tria un cicle concret a sota']
+      },
+      cfgm: {
+        title: 'CFGM',
+        desc: 'Cicle formatiu de grau mitjà. Normalment dura 2 anys.',
+        metrics: [
+          ['Durada', '2 anys'],
+          ['Quines opcions tens després', 'Treballar o passar a CFGS'],
+          ['Possibles salaris en el futur', 'Quan acabes un CFGM i et contracta una empresa del sector, el sou immediat d’entrada acostuma a estar aproximadament entre 1.200 € i 1.500 € bruts al mes, depenent del conveni, de si hi ha torns, del tipus d’empresa i de l’especialitat concreta. En àrees industrials o tècniques pot pujar més ràpid que en àrees administratives o de serveis.'],
+          ['Nota mínima aprox. (últim any)', 'Depèn del cicle']
+        ],
+        options: ['Exemples: Gestió Administrativa, SMX, etc.'],
+        subjects: ['Mòduls professionals', 'FCT / pràctiques']
+      },
+      cfgs: {
+        title: 'CFGS',
+        desc: 'Cicle formatiu de grau superior. Normalment dura 2 anys.',
+        metrics: [
+          ['Durada', '2 anys'],
+          ['Quines opcions tens després', 'Treballar o accedir a la universitat'],
+          ['Possibles salaris en el futur', 'Quan acabes un CFGS i entres directament a empresa, el sou inicial acostuma a ser més alt que el d’un CFGM perquè ja tens una especialització més forta. Com a orientació, podria moure’s aproximadament entre 1.400 € i 1.900 € bruts al mes just en començar, i en sectors tecnològics, industrials o amb molta demanda podria superar això al cap de poc temps.'],
+          ['Nota mínima aprox. (últim any)', 'Depèn del cicle']
+        ],
+        options: ['Exemples: DAW, DAM, Comerç Internacional, etc.'],
+        subjects: ['Mòduls professionals avançats', 'FCT / pràctiques']
+      },
+      selectivitat: {
+        title: 'Selectivitat',
+        desc: 'Proves per accedir a molts graus universitaris després del batxillerat.',
+        metrics: [
+          ['Durada', 'Proves puntuals'],
+          ['Quines opcions tens després', 'Universitat / grau'],
+          ['Possibles salaris en el futur', 'La selectivitat no dona sou perquè no és una titulació laboral. Serveix per entrar a la universitat. El salari que puguis tenir després dependrà completament del grau que facis, del sector professional i de l’empresa on acabis treballant.'],
+          ['Nota mínima aprox. (últim any)', 'Variable segons universitat']
+        ],
+        options: ['PAU / Selectivitat'],
+        subjects: ['Matèries comunes i específiques segons modalitat']
+      },
+      universitat: {
+        title: 'Universitat / Grau',
+        desc: 'Estudis universitaris després de batxillerat o alguns CFGS.',
+        metrics: [
+          ['Durada', '3 a 5 anys habitualment'],
+          ['Quines opcions tens després', 'Món laboral, màsters, oposicions...'],
+          ['Possibles salaris en el futur', 'Quan acabes un grau universitari, el sou immediat d’entrada pot variar moltíssim segons la carrera. Hi ha graus amb sortides inicials més modestes i d’altres amb sous inicials molt superiors. Com a orientació general molt àmplia, l’entrada laboral podria començar aproximadament entre 1.300 € i 2.200 € bruts al mes, però en alguns sectors pot quedar per sota o per sobre.'],
+          ['Nota mínima aprox. (últim any)', 'Segons el grau']
+        ],
+        options: ['Carreres universitàries', 'Graus de diferents àmbits'],
+        subjects: ['Depenen totalment de la carrera']
+      },
+      sortides_cfgm: {
+        title: 'Sortides CFGM',
+        desc: 'Després d’un CFGM pots treballar o passar a CFGS.',
+        metrics: [
+          ['Durada', 'Després dels 2 anys del CFGM'],
+          ['Quines opcions tens després', 'Treball o CFGS'],
+          ['Possibles salaris en el futur', 'Si decideixes treballar just després del CFGM, el sou immediat orientatiu acostuma a estar al voltant de 1.200 € a 1.500 € bruts al mes. Si continues a CFGS, renuncies temporalment a aquest sou inicial per guanyar especialització i poder aspirar després a una entrada laboral millor.'],
+          ['Nota mínima aprox. (últim any)', '-']
+        ],
+        options: ['Feines inicials', 'Continuar estudiant'],
+        subjects: ['No hi ha assignatures perquè és una sortida']
+      },
+      sortides_cfgs: {
+        title: 'Sortides CFGS',
+        desc: 'Després d’un CFGS pots treballar o accedir a graus universitaris.',
+        metrics: [
+          ['Durada', 'Després dels 2 anys del CFGS'],
+          ['Quines opcions tens després', 'Feines qualificades o grau universitari'],
+          ['Possibles salaris en el futur', 'Si treballes just després del CFGS, una empresa et podria pagar d’entrada aproximadament entre 1.400 € i 1.900 € bruts al mes, segons especialitat i conveni. Si després vas a la universitat, el guany immediat es posposa però pots ampliar opcions professionals a llarg termini.'],
+          ['Nota mínima aprox. (últim any)', '-']
+        ],
+        options: ['Feina', 'Universitat'],
+        subjects: ['No hi ha assignatures perquè és una sortida']
+      }
+    };
+
+    const batxilleratsOlot = {
+      'Institut Bosc de la Coma': {
+        'Humanitats i Ciències Socials': ['Llengua', 'Història', 'Economia', 'Matemàtiques aplicades', 'Geografia', 'Literatura'],
+        'Ciències i Tecnologia': ['Matemàtiques', 'Física', 'Química', 'Biologia', 'Tecnologia', 'Dibuix tècnic']
+      },
+      'Institut La Garrotxa': {
+        'Ciències i Tecnologia': ['Matemàtiques', 'Física', 'Química', 'Biologia', 'Tecnologia', 'Dibuix tècnic'],
+        'Humanitats i Ciències Socials': ['Llengua', 'Història', 'Economia', 'Matemàtiques aplicades', 'Geografia', 'Literatura']
+      },
+      "Escola d'Art d'Olot": {
+        'Batxillerat d’Arts': ['Dibuix artístic', 'Fonaments de l’art', 'Volum', 'Cultura audiovisual', 'Disseny', 'Projectes artístics']
+      }
+    };
+
+    const itinerariesInfo = {
+      green: {
+        name: 'Camí verd',
+        color: 'green',
+        why: 'Opció més pràctica i orientada a feina / FP.',
+        path: ['eso','cicles','cfgm','sortides_cfgm']
+      },
+      blue: {
+        name: 'Camí blau',
+        color: 'blue',
+        why: 'Opció equilibrada amb continuïtat acadèmica i sortides tècniques.',
+        path: ['eso','cicles','cfgs','sortides_cfgs']
+      },
+      red: {
+        name: 'Camí vermell',
+        color: 'red',
+        why: 'Opció més acadèmica cap a selectivitat i universitat.',
+        path: ['eso','batxillerat','selectivitat','universitat']
+      }
+    };
+
+    const compareItems = {
+      'Batxillerat': { durada:'2 anys', estil:'Més teòric', continua:'Selectivitat / CFGS / Grau', sou:'Entrada laboral directa general: uns 1.100 € a 1.350 € bruts/mes' },
+      'CFGM': { durada:'2 anys', estil:'Més pràctic', continua:'CFGS o feina', sou:'Uns 1.200 € a 1.500 € bruts/mes en començar' },
+      'CFGS': { durada:'2 anys', estil:'Pràctic + especialitzat', continua:'Feina o grau', sou:'Uns 1.400 € a 1.900 € bruts/mes en començar' },
+      'PTT / PFI': { durada:'1 any', estil:'Molta orientació pràctica', continua:'CFGM o feina', sou:'Feines inicials bàsiques: uns 1.100 € a 1.300 € bruts/mes' },
+      'Treballar': { durada:'Immediat', estil:'Entrada directa', continua:'Feina o estudis més endavant', sou:'Uns 1.100 € a 1.300 € bruts/mes orientatius' }
+    };
+
+    const boardQuestions = [
+      'Quin treball t’agradaria fer de gran?',
+      'Prefereixes una opció més pràctica o més teòrica?',
+      'T’agradaria continuar estudiant molts anys o començar abans a treballar?',
+      'Quines matèries t’agraden més?',
+      'Et veus en un àmbit creatiu, tecnològic, social o pràctic?'
+    ];
+
+    // =========================
+    // NOTES DE TALL AUTOMÀTIQUES
+    // =========================
+    const cutoffData = {
+      // BATXILLERATS
+      'humanitats i ciències socials': '5.00',
+      'humanitats i ciencies socials': '5.00',
+      'ciències i tecnologia': '5.00',
+      'ciencies i tecnologia': '5.00',
+      'batxillerat d’arts': '5.00',
+      "batxillerat d'arts": '5.00',
+      'arts': '5.00',
+
+      // BOSC
+      'cfgm gestió administrativa': '5.20',
+      'cfgm gestio administrativa': '5.20',
+      'gestió administrativa': '5.20',
+      'gestio administrativa': '5.20',
+
+      'cfgm sistemes microinformàtics i xarxes': '6.30',
+      'cfgm sistemes microinformatics i xarxes': '6.30',
+      'sistemes microinformàtics i xarxes': '6.30',
+      'sistemes microinformatics i xarxes': '6.30',
+      'smx': '6.30',
+
+      'cfgs administració i finances (dual)': '7.10',
+      'cfgs administracio i finances (dual)': '7.10',
+      'cfgs administració i finances': '7.10',
+      'cfgs administracio i finances': '7.10',
+      'administració i finances': '7.10',
+      'administracio i finances': '7.10',
+
+      'cfgs comerç internacional (dual)': '7.40',
+      'cfgs comerc internacional (dual)': '7.40',
+      'cfgs comerç internacional': '7.40',
+      'cfgs comerc internacional': '7.40',
+      'comerç internacional': '7.40',
+      'comerc internacional': '7.40',
+
+      'cfgs transport i logística (dual)': '6.80',
+      'cfgs transport i logistica (dual)': '6.80',
+      'cfgs transport i logística': '6.80',
+      'cfgs transport i logistica': '6.80',
+      'transport i logística': '6.80',
+      'transport i logistica': '6.80',
+
+      'cfgs administració de sistemes informàtics en xarxa (dual)': '7.90',
+      'cfgs administracio de sistemes informatics en xarxa (dual)': '7.90',
+      'cfgs administració de sistemes informàtics en xarxa': '7.90',
+      'cfgs administracio de sistemes informatics en xarxa': '7.90',
+      'administració de sistemes informàtics en xarxa': '7.90',
+      'administracio de sistemes informatics en xarxa': '7.90',
+      'asix': '7.90',
+
+      'cfgs desenvolupament d’aplicacions multiplataforma (dual)': '8.10',
+      "cfgs desenvolupament d'aplicacions multiplataforma (dual)": '8.10',
+      'cfgs desenvolupament d’aplicacions multiplataforma': '8.10',
+      "cfgs desenvolupament d'aplicacions multiplataforma": '8.10',
+      'desenvolupament d’aplicacions multiplataforma': '8.10',
+      "desenvolupament d'aplicacions multiplataforma": '8.10',
+      'dam': '8.10',
+
+      'cfgs desenvolupament d’aplicacions web (dual)': '8.35',
+      "cfgs desenvolupament d'aplicacions web (dual)": '8.35',
+      'cfgs desenvolupament d’aplicacions web': '8.35',
+      "cfgs desenvolupament d'aplicacions web": '8.35',
+      'desenvolupament d’aplicacions web': '8.35',
+      "desenvolupament d'aplicacions web": '8.35',
+      'daw': '8.35',
+
+      // GARROTXA
+      'cfgm producció agropecuària': '5.00',
+      'cfgm produccio agropecuaria': '5.00',
+      'producció agropecuària': '5.00',
+      'produccio agropecuaria': '5.00',
+
+      'cfgm jardineria i floristeria': '5.00',
+      'jardineria i floristeria': '5.00',
+
+      'cfgm elaboració de productes alimentaris': '5.10',
+      'cfgm elaboracio de productes alimentaris': '5.10',
+      'elaboració de productes alimentaris': '5.10',
+      'elaboracio de productes alimentaris': '5.10',
+
+      'cfgm instal·lacions elèctriques i automàtiques': '5.60',
+      'cfgm installacions electriques i automatiques': '5.60',
+      'cfgm instalacions electriques i automatiques': '5.60',
+      'instal·lacions elèctriques i automàtiques': '5.60',
+      'instalacions electriques i automatiques': '5.60',
+
+      'cfgm manteniment electromecànic': '5.80',
+      'cfgm manteniment electromecanic': '5.80',
+      'manteniment electromecànic': '5.80',
+      'manteniment electromecanic': '5.80',
+
+      'cfgm mecanització': '5.50',
+      'cfgm mecanitzacio': '5.50',
+      'mecanització': '5.50',
+      'mecanitzacio': '5.50',
+
+      'cfgm confecció i moda': '5.40',
+      'cfgm confeccio i moda': '5.40',
+      'confecció i moda': '5.40',
+      'confeccio i moda': '5.40',
+
+      'cfgm cures auxiliars d’infermeria': '7.20',
+      "cfgm cures auxiliars d'infermeria": '7.20',
+      'cures auxiliars d’infermeria': '7.20',
+      "cures auxiliars d'infermeria": '7.20',
+      'cai': '7.20',
+
+      'cfgm construcció': '5.00',
+      'cfgm construccio': '5.00',
+      'construcció': '5.00',
+      'construccio': '5.00',
+
+      'cfgs ramaderia i assistència en sanitat animal': '6.40',
+      'cfgs ramaderia i assistencia en sanitat animal': '6.40',
+      'ramaderia i assistència en sanitat animal': '6.40',
+      'ramaderia i assistencia en sanitat animal': '6.40',
+
+      'cfgs fabricació mecànica, emmotllament i disseny': '6.60',
+      'cfgs fabricacio mecanica, emmotllament i disseny': '6.60',
+      'fabricació mecànica': '6.60',
+      'fabricacio mecanica': '6.60',
+
+      'cfgs automatització i robòtica industrial': '7.75',
+      'cfgs automatitzacio i robotica industrial': '7.75',
+      'automatització i robòtica industrial': '7.75',
+      'automatitzacio i robotica industrial': '7.75',
+
+      'cfgs mecatrònica industrial': '7.30',
+      'cfgs mecatronica industrial': '7.30',
+      'mecatrònica industrial': '7.30',
+      'mecatronica industrial': '7.30',
+
+      'cfgs patronatge i moda': '6.20',
+      'patronatge i moda': '6.20',
+
+      'cfgs laboratori clínic i biomèdic': '8.25',
+      'cfgs laboratori clinic i biomedic': '8.25',
+      'laboratori clínic i biomèdic': '8.25',
+      'laboratori clinic i biomedic': '8.25',
+
+      // ESCOLA D'ART
+      'cfgm apgi': '5.30',
+      'apgi': '5.30',
+
+      'cfgm revestiments murals': '5.00',
+      'revestiments murals': '5.00',
+
+      'cfgs gràfica publicitària': '6.90',
+      'cfgs grafica publicitaria': '6.90',
+      'gràfica publicitària': '6.90',
+      'grafica publicitaria': '6.90',
+
+      'cfgs decoració': '6.50',
+      'cfgs decoracio': '6.50',
+      'decoració': '6.50',
+      'decoracio': '6.50',
+
+      'cfgs fotografia i audiovisuals': '7.60',
+      'fotografia i audiovisuals': '7.60',
+
+      'cfgs il·lustració': '7.80',
+      'cfgs illustracio': '7.80',
+      'il·lustració': '7.80',
+      'illustracio': '7.80',
+
+      'cfgs producció de personatge escultòric': '6.10',
+      'cfgs produccio de personatge escultoric': '6.10',
+      'producció de personatge escultòric': '6.10',
+      'produccio de personatge escultoric': '6.10'
+    };
+
+    // =========================
+    // UTILITATS
+    // =========================
+    function save(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function load(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch{
+        return fallback;
+      }
+    }
+
+    function normalizeText(text){
+      return (text || '')
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[’']/g, "'")
+        .replace(/\s+/g, ' ');
+    }
+
+    function getCutoffFromOption(option, path){
+      const normalized = normalizeText(option);
+
+      if(!normalized){
+        return {
+          value: '',
+          hint: 'Escriu primer el cicle o la modalitat i la nota de tall es posarà automàticament.'
+        };
+      }
+
+      if(cutoffData[normalized]){
+        return {
+          value: cutoffData[normalized],
+          hint: `Nota de tall orientativa trobada per a: ${option}`
+        };
+      }
+
+      for(const key of Object.keys(cutoffData)){
+        if(normalized.includes(key) || key.includes(normalized)){
+          return {
+            value: cutoffData[key],
+            hint: `Nota de tall orientativa detectada segons: ${option}`
+          };
+        }
+      }
+
+      if(path === 'batxillerat'){
+        return {
+          value: '5.00',
+          hint: 'Batxillerat detectat. S’ha posat una orientació general de 5.00.'
+        };
+      }
+
+      if(path === 'cicles'){
+        return {
+          value: '-',
+          hint: 'Aquest cicle no és a la llista exacta. Pots escriure el nom més complet per afinar la nota.'
+        };
+      }
+
+      return {
+        value: '-',
+        hint: 'No hi ha nota automàtica per aquesta opció.'
+      };
+    }
+
+    function addMsg(boxId, text, cls){
+      const div = document.createElement('div');
+      div.className = `msg ${cls}`;
+      div.textContent = text;
+      qs(boxId).appendChild(div);
+      qs(boxId).scrollTop = qs(boxId).scrollHeight;
+      localStorage.setItem(boxId, qs(boxId).innerHTML);
+    }
+
+    function restoreChat(boxId){
+      const html = localStorage.getItem(boxId);
+      if(html) qs(boxId).innerHTML = html;
+    }
+
+    function stars(n){
+      return `<span class="stars">${'★'.repeat(n)}${'☆'.repeat(5-n)}</span>`;
+    }
+
+    // =========================
+    // NAVEGACIÓ
+    // =========================
+    function showPage(pageId){
+      qsa('.page').forEach(p => p.classList.remove('active'));
+      qs(pageId).classList.add('active');
+
+      qsa('#mainNav button').forEach(b => b.classList.remove('active'));
+      document.querySelector(`#mainNav button[data-page="${pageId}"]`)?.classList.add('active');
+
+      if(pageId === 'mapa'){
+        setTimeout(() => {
+          if(mapInstance){
+            mapInstance.invalidateSize(true);
+            mapInstance.setView([42.1795, 2.4810], 14, {animate:false});
+          }
+        }, 140);
+      }
+    }
+
+    qsa('#mainNav button').forEach(btn => {
+      btn.addEventListener('click', () => showPage(btn.dataset.page));
+    });
+
+    // =========================
+    // ITINERARIS
+    // =========================
+    function resetLines(){
+      qsa('.path-line').forEach(l => l.classList.remove('green','blue','red'));
+    }
+
+    function paintPath(pathIds, color){
+      resetLines();
+      const map = {
+        'eso>treball':'line-eso-treball',
+        'eso>ptt':'line-eso-ptt',
+        'eso>cicles':'line-eso-cicles',
+        'eso>batxillerat':'line-eso-batx',
+        'cicles>cfgm':'line-cicles-cfgm',
+        'cicles>cfgs':'line-cicles-cfgs',
+        'cfgm>sortides_cfgm':'line-cfgm-sortides',
+        'cfgs>sortides_cfgs':'line-cfgs-sortides',
+        'batxillerat>selectivitat':'line-batx-select',
+        'selectivitat>universitat':'line-select-grau',
+        'cfgm>selectivitat':'line-cfgm-select'
+      };
+
+      for(let i=0;i<pathIds.length-1;i++){
+        const id = map[`${pathIds[i]}>${pathIds[i+1]}`];
+        if(id) qs(id).classList.add(color);
+      }
+    }
+
+    function renderInfo(routeKey){
+      const data = routeData[routeKey];
+      if(!data) return;
+
+      qs('infoTitle').textContent = data.title;
+      qs('infoDesc').textContent = data.desc;
+      qs('infoMetrics').innerHTML = data.metrics.map(([k,v]) => `
+        <div class="info-box">
+          <strong>${k}</strong>
+          <div>${v}</div>
+        </div>
+      `).join('');
+
+      qs('infoOptions').innerHTML = data.options.map(x => `<span class="chip">${x}</span>`).join(' ');
+      qs('infoSubjects').innerHTML = data.subjects.map(x => `<div style="margin-bottom:8px">• ${x}</div>`).join('');
+
+      qsa('.svg-node').forEach(n => n.classList.remove('active'));
+      document.querySelector(`.svg-node[data-route="${routeKey}"]`)?.classList.add('active');
+
+      renderSubTria(routeKey);
+    }
+
+    function renderSubTria(routeKey){
+      const box = qs('subTria');
+
+      if(routeKey === 'batxillerat'){
+        box.innerHTML = `
+          <div class="grid-auto">
+            ${Object.entries(batxilleratsOlot).map(([centre, modalitats]) => `
+              <div class="info-box">
+                <strong>${centre}</strong>
+                <div class="grid-auto">
+                  ${Object.keys(modalitats).map(mod => `
+                    <button class="badge badge-click" data-batx-centre="${centre}" data-batx-modalitat="${mod}">${mod}</button>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if(routeKey === 'cicles'){
+        box.innerHTML = `
+          <div class="grid-auto">
+            ${Object.entries(centres).map(([id, centre]) => `
+              <div class="info-box">
+                <strong>${centre.nom}</strong>
+                <div class="muted">${centre.adreca}</div>
+                <div style="margin-top:10px" class="grid-auto">
+                  ${centre.cicles.map(c => `<button class="badge badge-click" data-cycle="${c}" data-centre="${centre.nom}">${c}</button>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        box.innerHTML = 'Quan cliquis Batxillerat o Cicles, aquí podràs triar l’opció concreta.';
+      }
+
+      qsa('[data-batx-centre]').forEach(btn => {
+        btn.onclick = () => {
+          const centre = btn.dataset.batxCentre;
+          const mod = btn.dataset.batxModalitat;
+          const subjects = batxilleratsOlot[centre][mod] || [];
+
+          qs('infoTitle').textContent = `${mod} · ${centre}`;
+          qs('infoDesc').textContent = `Modalitat de batxillerat disponible a ${centre}.`;
+          qs('infoSubjects').innerHTML = subjects.map(x => `<div style="margin-bottom:8px">• ${x}</div>`).join('');
+          qs('infoOptions').innerHTML = `<span class="chip">${mod}</span> <span class="chip">${centre}</span>`;
+        };
+      });
+
+      qsa('[data-cycle]').forEach(btn => {
+        btn.onclick = () => {
+          const cycle = btn.dataset.cycle;
+          const centre = btn.dataset.centre;
+          qs('infoTitle').textContent = cycle;
+          qs('infoDesc').textContent = `Cicle disponible a ${centre}.`;
+          qs('infoOptions').innerHTML = `<span class="chip">${centre}</span> <span class="chip">${cycle}</span>`;
+          qs('infoSubjects').innerHTML = `
+            <div>• Mòduls professionals específics del cicle</div>
+            <div>• Projectes pràctics</div>
+            <div>• FCT / pràctiques en empresa</div>
+            <div>• El detall exacte pot variar segons curs i centre</div>
+          `;
+        };
+      });
+    }
+
+    qsa('.svg-node').forEach(node => {
+      node.addEventListener('click', () => renderInfo(node.dataset.route));
+    });
+
+    function generateOrientationOptions(text){
+      const t = text.toLowerCase();
+      const opts = [];
+
+      if(t.includes('art') || t.includes('dibuix') || t.includes('creatiu')){
+        opts.push({...itinerariesInfo.red, name:'Arts + estudis creatius', path:['eso','batxillerat','selectivitat','universitat']});
+      }
+      if(t.includes('inform') || t.includes('ordinador') || t.includes('program') || t.includes('web')){
+        opts.push({...itinerariesInfo.blue, name:'FP tecnològica', path:['eso','cicles','cfgs','sortides_cfgs']});
+      }
+      if(t.includes('pràctic') || t.includes('practic') || t.includes('treballar')){
+        opts.push({...itinerariesInfo.green, name:'Camí pràctic', path:['eso','cicles','cfgm','sortides_cfgm']});
+      }
+
+      while(opts.length < 3){
+        const pool = Object.values(itinerariesInfo);
+        const next = pool[opts.length];
+        opts.push({...next});
+      }
+      return opts.slice(0,3);
+    }
+
+    function renderGeneratedOptions(options){
+      const colors = ['green','blue','red'];
+
+      qs('opcionsGenerades').innerHTML = options.map((o,i) => `
+        <div class="info-box">
+          <strong>${o.name}</strong>
+          <div class="muted" style="margin-bottom:10px">${o.why}</div>
+          <button class="btn ${colors[i]==='green'?'success':colors[i]==='red'?'danger':'secondary'}" data-pick="${i}">
+            Marcar opció
+          </button>
+        </div>
+      `).join('');
+
+      qsa('[data-pick]').forEach(btn => {
+        btn.onclick = () => {
+          const idx = Number(btn.dataset.pick);
+          const chosen = options[idx];
+          paintPath(chosen.path, colors[idx]);
+          qs('resumProfe').innerHTML = `
+            <div><strong>${chosen.name}</strong></div>
+            <div style="margin-top:6px">${chosen.why}</div>
+            <div style="margin-top:10px">Camí: ${chosen.path.join(' → ')}</div>
+          `;
+          save('generatedRoutes', options);
+          save('selectedRouteIndex', idx);
+        };
+      });
+    }
+
+    qs('btnEnviarOrientador').onclick = () => {
+      const text = qs('inputOrientador').value.trim();
+      if(!text) return;
+      addMsg('chatOrientador', text, 'user');
+      const options = generateOrientationOptions(text);
+      addMsg('chatOrientador', 'He preparat 3 opcions de recorregut segons el teu text. Marca la que més t’encaixi.', 'ai');
+      renderGeneratedOptions(options);
+      qs('inputOrientador').value = '';
+    };
+
+    qs('btnResetOrientador').onclick = () => {
+      qs('opcionsGenerades').innerHTML = '';
+      qs('resumProfe').textContent = 'Encara no hi ha cap recorregut seleccionat.';
+      qs('inputOrientador').value = '';
+      resetLines();
+      localStorage.removeItem('generatedRoutes');
+      localStorage.removeItem('selectedRouteIndex');
+    };
+
+    qs('btnGuardarRecorregut').onclick = () => {
+      const options = load('generatedRoutes', []);
+      const idx = load('selectedRouteIndex', null);
+      const name = qs('nomRecorregut').value.trim();
+
+      if(idx === null || !options[idx]) return;
+
+      const saved = load('savedRoutesData', []);
+      saved.push({
+        name: name || options[idx].name,
+        ...options[idx]
+      });
+      save('savedRoutesData', saved);
+      renderSavedRoutes();
+      qs('nomRecorregut').value = '';
+    };
+
+    function renderSavedRoutes(){
+      const saved = load('savedRoutesData', []);
+      qs('savedRoutes').innerHTML = saved.length ? saved.map((r, i) => `
+        <div class="card" style="margin-bottom:12px">
+          <strong>${r.name}</strong>
+          <div class="muted" style="margin-top:6px">${r.why}</div>
+          <div style="margin-top:8px">${r.path.join(' → ')}</div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn secondary" data-open-route="${i}">Veure</button>
+            <button class="btn danger" data-delete-route="${i}">Esborrar</button>
+          </div>
+        </div>
+      `).join('') : '<div class="muted">Encara no hi ha recorreguts guardats.</div>';
+
+      qsa('[data-open-route]').forEach(btn => {
+        btn.onclick = () => {
+          const i = Number(btn.dataset.openRoute);
+          const r = saved[i];
+          if(!r) return;
+          showPage('itineraris');
+          paintPath(r.path, r.color || 'blue');
+          qs('resumProfe').innerHTML = `<strong>${r.name}</strong><div style="margin-top:8px">${r.why}</div>`;
+        };
+      });
+
+      qsa('[data-delete-route]').forEach(btn => {
+        btn.onclick = () => {
+          const i = Number(btn.dataset.deleteRoute);
+          saved.splice(i,1);
+          save('savedRoutesData', saved);
+          renderSavedRoutes();
+        };
+      });
+    }
+
+    // =========================
+    // NOMS
+    // =========================
+    let currentStudent = load('currentStudent', 'Pol');
+    const studentData = load('studentData', {});
+
+    students.forEach(s => {
+      if(!studentData[s]) studentData[s] = { path:'batxillerat', option:'', cutoff:'', obs:'' };
+    });
+
+    function updateStudentCutoffAuto(){
+      const path = qs('studentPath').value;
+      const option = qs('studentOption').value;
+      const result = getCutoffFromOption(option, path);
+
+      qs('studentGrade').value = result.value;
+      qs('studentCutoffHint').textContent = result.hint;
+
+      studentData[currentStudent] = {
+        path: qs('studentPath').value,
+        option: qs('studentOption').value,
+        cutoff: result.value,
+        obs: qs('studentObs').value
+      };
+
+      save('studentData', studentData);
+      renderStudentMini();
+      renderClassStats();
+    }
+
+    function renderStudents(){
+      qs('studentList').innerHTML = students.map(s => `
+        <button class="student-btn ${s===currentStudent?'active':''}" data-student="${s}">${s}</button>
+      `).join('');
+
+      qsa('[data-student]').forEach(btn => {
+        btn.onclick = () => {
+          currentStudent = btn.dataset.student;
+          save('currentStudent', currentStudent);
+          renderStudents();
+          fillStudentForm();
+        };
+      });
+    }
+
+    function fillStudentForm(){
+      const d = studentData[currentStudent];
+      qs('studentTitle').textContent = `Fitxa de ${currentStudent}`;
+      qs('studentPath').value = d.path;
+      qs('studentOption').value = d.option;
+      qs('studentObs').value = d.obs;
+
+      const result = getCutoffFromOption(d.option, d.path);
+      qs('studentGrade').value = d.option ? result.value : (d.cutoff || '');
+      qs('studentCutoffHint').textContent = d.option
+        ? result.hint
+        : 'Es calcula automàticament segons el cicle o batxillerat.';
+
+      if(d.option){
+        studentData[currentStudent].cutoff = result.value;
+        save('studentData', studentData);
+      }
+
+      renderStudentMini();
+      renderClassStats();
+    }
+
+    function renderStudentMini(){
+      const d = studentData[currentStudent];
+      qs('miniStudentSummary').innerHTML = `
+        <div class="info-box"><strong>Itinerari</strong>${d.path}</div>
+        <div class="info-box"><strong>Cicle / modalitat</strong>${d.option || '-'}</div>
+        <div class="info-box"><strong>Nota de tall any passat</strong>${d.cutoff || '-'}</div>
+        <div class="info-box"><strong>Observacions</strong>${d.obs || '-'}</div>
+      `;
+    }
+
+    qs('studentPath').addEventListener('input', updateStudentCutoffAuto);
+    qs('studentOption').addEventListener('input', updateStudentCutoffAuto);
+
+    qs('studentObs').addEventListener('input', () => {
+      studentData[currentStudent] = {
+        path: qs('studentPath').value,
+        option: qs('studentOption').value,
+        cutoff: qs('studentGrade').value,
+        obs: qs('studentObs').value
+      };
+      save('studentData', studentData);
+      renderStudentMini();
+      renderClassStats();
+    });
+
+    function renderClassStats(){
+      const paths = { batxillerat:0, cicles:0, ptt:0, treball:0 };
+      Object.values(studentData).forEach(v => {
+        if(paths[v.path] !== undefined) paths[v.path]++;
+      });
+
+      qs('classStats').innerHTML = `
+        <div class="info-box"><strong>Persones a la classe</strong>${students.length}</div>
+        <div class="info-box"><strong>Batxillerat</strong>${paths.batxillerat}</div>
+        <div class="info-box"><strong>Cicles</strong>${paths.cicles}</div>
+        <div class="info-box"><strong>PTT / PFI</strong>${paths.ptt}</div>
+        <div class="info-box"><strong>Treballar</strong>${paths.treball}</div>
+      `;
+    }
+
+    qs('btnAnalitzaAlumne').onclick = () => {
+      const text = qs('inputAlumne').value.trim();
+      if(!text) return;
+      addMsg('chatAlumne', text, 'user');
+
+      let suggestion = 'Batxillerat';
+      let reason = 'Perfil acadèmic general.';
+      if(/art|dibuix|creatiu/i.test(text)){
+        suggestion = 'Batxillerat d’Arts / Escola d’Art';
+        reason = 'Hi ha un perfil creatiu clar.';
+      } else if(/inform|web|program|ordinador/i.test(text)){
+        suggestion = 'Cicles d’informàtica al Bosc de la Coma';
+        reason = 'Perfil tecnològic i aplicat.';
+      } else if(/practic|pràctic|feina/i.test(text)){
+        suggestion = 'CFGM o PTT / PFI';
+        reason = 'Pot encaixar millor una via pràctica.';
+      }
+
+      addMsg('chatAlumne', `Orientació recomanada: ${suggestion}. Motiu: ${reason}`, 'ai');
+      qs('inputAlumne').value = '';
+    };
+
+    qs('btnNetejaChatAlumne').onclick = () => {
+      qs('chatAlumne').innerHTML = '';
+      localStorage.setItem('chatAlumne','');
+    };
+
+    // =========================
+    // PISSARRA
+    // =========================
+    function nextQuestion(){
+      const q = boardQuestions[Math.floor(Math.random()*boardQuestions.length)];
+      qs('gameQuestion').textContent = q;
+      save('gameQuestion', q);
+    }
+
+    function renderBoard(){
+      const items = load('boardItemsData', []);
+      qs('boardItems').innerHTML = items.length ? items.map((x,i)=>`
+        <div class="timeline-item">
+          <strong>${x.question}</strong>
+          <div style="margin-top:8px">${x.answer}</div>
+          <button class="btn danger" data-del-board="${i}" style="margin-top:10px">Esborrar</button>
+        </div>
+      `).join('') : '<div class="muted">Encara no hi ha res a la pissarra.</div>';
+
+      qsa('[data-del-board]').forEach(btn=>{
+        btn.onclick=()=>{
+          const i=Number(btn.dataset.delBoard);
+          const items = load('boardItemsData', []);
+          items.splice(i,1);
+          save('boardItemsData', items);
+          renderBoard();
+        };
+      });
+    }
+
+    qs('btnAddGameAnswer').onclick = () => {
+      const answer = qs('gameAnswer').value.trim();
+      if(!answer) return;
+      const items = load('boardItemsData', []);
+      items.push({ question: qs('gameQuestion').textContent, answer });
+      save('boardItemsData', items);
+      qs('gameAnswer').value = '';
+      renderBoard();
+    };
+
+    qs('btnNewQuestion').onclick = nextQuestion;
+    qs('btnClearBoard').onclick = () => {
+      save('boardItemsData', []);
+      renderBoard();
+    };
+
+    // =========================
+    // MAPA
+    // =========================
+    let mapInstance = null;
+    let mapMarkers = {};
+
+    function getMapOptions(type){
+      const set = new Set();
+      Object.values(centres).forEach(c => {
+        (type === 'batxillerat' ? c.batxillerats : c.cicles).forEach(x => set.add(x));
+      });
+      return Array.from(set).sort((a,b)=>a.localeCompare(b,'ca'));
+    }
+
+    function fillMapOptionSelect(){
+      const type = qs('mapType').value;
+      const options = getMapOptions(type);
+      qs('mapOption').innerHTML = `<option value="">Tria una opció...</option>` +
+        options.map(o => `<option value="${o.replace(/"/g,'&quot;')}">${o}</option>`).join('');
+
+      const saved = localStorage.getItem('mapOption');
+      if(saved && options.includes(saved)) qs('mapOption').value = saved;
+    }
+
+    function mapPopup(c){
+      return `<strong>${c.nom}</strong><br>${c.adreca}<br><em>${c.desc}</em>`;
+    }
+
+    function createMap(){
+      if(mapInstance) return;
+
+      mapInstance = L.map('mapaLeaflet', {
+        zoomControl: true
+      }).setView([42.1795, 2.4810], 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(mapInstance);
+
+      Object.entries(centres).forEach(([id,c]) => {
+        const marker = L.circleMarker(c.coords, {
+          radius: 10,
+          color: c.color,
+          fillColor: c.color,
+          fillOpacity: 0.92,
+          weight: 3
+        }).addTo(mapInstance).bindPopup(mapPopup(c));
+
+        marker.on('click', () => renderMapCenterInfo(id));
+        mapMarkers[id] = marker;
+      });
+
+      setTimeout(() => {
+        mapInstance.invalidateSize(true);
+        mapInstance.setView([42.1795, 2.4810], 14, {animate:false});
+      }, 180);
+    }
+
+    function renderMapCenterInfo(id){
+      const c = centres[id];
+      if(!c) return;
+
+      const type = qs('mapType').value;
+      const list = type === 'batxillerat' ? c.batxillerats : c.cicles;
+      const title = type === 'batxillerat' ? 'Batxillerats' : 'Cicles';
+
+      qs('mapCenterInfo').innerHTML = `
+        <strong>${c.nom}</strong>
+        <p class="muted">${c.adreca}</p>
+        <p>${c.desc}</p>
+        <p><strong>${title}:</strong></p>
+        <div>${list.map(x=>`<div style="margin-bottom:8px">• ${x}</div>`).join('')}</div>
+      `;
+
+      save('selectedMapCenter', id);
+
+      Object.entries(mapMarkers).forEach(([mid,m]) => {
+        const active = mid === id;
+        m.setStyle({
+          radius: active ? 13 : 10,
+          color: active ? '#111827' : centres[mid].color,
+          fillColor: centres[mid].color,
+          fillOpacity: 0.95,
+          weight: active ? 5 : 3
+        });
+      });
+    }
+
+    function rankCenter(option, centre, type){
+      if(!option) return 0;
+      const list = type === 'batxillerat' ? centre.batxillerats : centre.cicles;
+      if(list.includes(option)) return 5;
+
+      const q = option.toLowerCase();
+      const full = list.join(' · ').toLowerCase();
+      const words = q.split(/\s+/).filter(Boolean);
+      let matches = 0;
+      words.forEach(w => { if(full.includes(w)) matches++; });
+
+      if(matches >= 3) return 4;
+      if(matches === 2) return 3;
+      if(matches === 1) return 2;
+      return 1;
+    }
+
+    function renderMapRanking(){
+      const type = qs('mapType').value;
+      const option = qs('mapOption').value;
+
+      if(!option){
+        qs('mapSummary').innerHTML = 'Escull el tipus i l’opció del desplegable.';
+        qs('mapRanking').innerHTML = '<div class="muted">Encara no hi ha cap valoració.</div>';
+        return;
+      }
+
+      const ranking = Object.entries(centres).map(([id,c]) => ({
+        id, centre:c, score: rankCenter(option, c, type)
+      })).sort((a,b)=>b.score-a.score);
+
+      qs('mapRanking').innerHTML = ranking.map((r,i)=>`
+        <div class="rank-card ${i===0?'top':''}">
+          <strong>${r.centre.nom}${i===0?' — recomanat':''}</strong><br>
+          ${stars(r.score)}
+        </div>
+      `).join('');
+
+      const best = ranking[0];
+      qs('mapSummary').innerHTML = `
+        <strong>Tipus triat:</strong> ${type}<br>
+        <strong>Opció triada:</strong> ${option}<br><br>
+        <strong>Centre destacat:</strong> ${best.centre.nom}<br>
+        <strong>Nota orientativa:</strong> ${best.score}/5
+      `;
+
+      Object.entries(mapMarkers).forEach(([id,m])=>{
+        const score = ranking.find(x=>x.id===id)?.score ?? 0;
+        const isBest = id === best.id;
+        m.setStyle({
+          radius: score >= 5 ? 14 : (isBest ? 13 : 10),
+          color: isBest ? '#111827' : centres[id].color,
+          fillColor: centres[id].color,
+          fillOpacity: 0.95,
+          weight: isBest ? 5 : 3
+        });
+      });
+
+      renderMapCenterInfo(best.id);
+
+      localStorage.setItem('mapType', type);
+      localStorage.setItem('mapOption', option);
+    }
+
+    qs('mapType').addEventListener('change', ()=>{
+      localStorage.setItem('mapType', qs('mapType').value);
+      fillMapOptionSelect();
+      renderMapRanking();
+    });
+
+    qs('mapOption').addEventListener('change', ()=>{
+      localStorage.setItem('mapOption', qs('mapOption').value);
+      renderMapRanking();
+    });
+
+    qs('btnMapSearch').onclick = renderMapRanking;
+    qs('btnMapReset').onclick = () => {
+      qs('mapOption').value = '';
+      localStorage.removeItem('mapOption');
+      renderMapRanking();
+    };
+
+    // =========================
+    // COMPARADOR
+    // =========================
+    function fillCompare(){
+      const opts = Object.keys(compareItems);
+      qs('compareA').innerHTML = opts.map(x=>`<option>${x}</option>`).join('');
+      qs('compareB').innerHTML = opts.map(x=>`<option>${x}</option>`).join('');
+      qs('compareB').value = 'CFGM';
+    }
+
+    qs('btnCompare').onclick = () => {
+      const a = compareItems[qs('compareA').value];
+      const b = compareItems[qs('compareB').value];
+      qs('compareResult').innerHTML = `
+        <div class="info-box">
+          <strong>${qs('compareA').value}</strong>
+          <div>Durada: ${a.durada}</div>
+          <div>Estil: ${a.estil}</div>
+          <div>Continua: ${a.continua}</div>
+          <div>Sou: ${a.sou}</div>
+        </div>
+        <div class="info-box">
+          <strong>${qs('compareB').value}</strong>
+          <div>Durada: ${b.durada}</div>
+          <div>Estil: ${b.estil}</div>
+          <div>Continua: ${b.continua}</div>
+          <div>Sou: ${b.sou}</div>
+        </div>
+      `;
+    };
+
+    // =========================
+    // SIMULADOR
+    // =========================
+    ['simPractic','simCreatiu','simTec','simEstudi'].forEach(id=>{
+      qs(id).addEventListener('input', ()=>{
+        qs(id+'Val').textContent = `${qs(id).value}/10`;
+      });
+    });
+
+    qs('btnSimulate').onclick = () => {
+      const practic = +qs('simPractic').value;
+      const creatiu = +qs('simCreatiu').value;
+      const tec = +qs('simTec').value;
+      const estudi = +qs('simEstudi').value;
+
+      let result = 'Batxillerat';
+      let reason = 'Perfil acadèmic general.';
+
+      if(creatiu >= 8) {
+        result = "Batxillerat d’Arts / Escola d'Art";
+        reason = 'Tens un perfil creatiu molt alt.';
+      } else if(tec >= 8 && practic >= 7) {
+        result = 'Cicles tecnològics';
+        reason = 'Perfil tecnològic i pràctic molt marcat.';
+      } else if(practic >= 8 && estudi <= 5) {
+        result = 'CFGM / PTT';
+        reason = 'Busques més pràctica i una entrada més directa.';
+      } else if(estudi >= 8) {
+        result = 'Batxillerat + estudis posteriors';
+        reason = 'Valores molt continuar estudiant.';
+      }
+
+      qs('simResult').innerHTML = `<strong>Recomanació:</strong> ${result}<br><br><strong>Motiu:</strong> ${reason}`;
+    };
+
+    // =========================
+    // PLANNER
+    // =========================
+    function renderPlanner(){
+      const items = load('plannerData', []);
+      qs('plannerList').innerHTML = items.length ? items.map((x,i)=>`
+        <div class="timeline-item">
+          ${x}
+          <div style="margin-top:10px">
+            <button class="btn danger" data-del-plan="${i}">Esborrar</button>
+          </div>
+        </div>
+      `).join('') : '<div class="muted">Encara no hi ha passos afegits.</div>';
+
+      qsa('[data-del-plan]').forEach(btn=>{
+        btn.onclick=()=>{
+          const items = load('plannerData', []);
+          items.splice(Number(btn.dataset.delPlan),1);
+          save('plannerData', items);
+          renderPlanner();
+        };
+      });
+    }
+
+    qs('btnAddPlanner').onclick = () => {
+      const text = qs('plannerInput').value.trim();
+      if(!text) return;
+      const items = load('plannerData', []);
+      items.push(text);
+      save('plannerData', items);
+      qs('plannerInput').value = '';
+      renderPlanner();
+    };
+
+    // =========================
+    // INICIALITZACIÓ
+    // =========================
+    function init(){
+      restoreChat('chatOrientador');
+      restoreChat('chatAlumne');
+
+      if(!qs('chatOrientador').innerHTML.trim()){
+        addMsg('chatOrientador', 'Hola. Explica què t’agrada i et prepararé 3 recorreguts orientatius.', 'ai');
+      }
+
+      renderSavedRoutes();
+      renderStudents();
+      fillStudentForm();
+
+      qs('gameQuestion').textContent = load('gameQuestion', boardQuestions[0]);
+      renderBoard();
+
+      fillCompare();
+
+      const savedGenerated = load('generatedRoutes', []);
+      if(savedGenerated.length) renderGeneratedOptions(savedGenerated);
+
+      renderInfo('eso');
+
+      qs('mapType').value = localStorage.getItem('mapType') || 'batxillerat';
+      fillMapOptionSelect();
+      createMap();
+
+      const selectedCenter = load('selectedMapCenter', 'garrotxa');
+      renderMapCenterInfo(selectedCenter);
+      renderMapRanking();
+
+      renderPlanner();
+
+      window.addEventListener('resize', () => {
+        if(mapInstance) mapInstance.invalidateSize(true);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
